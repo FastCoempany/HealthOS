@@ -100,6 +100,24 @@ export interface GuardrailItem {
   copy: string;
 }
 
+export type MotionKey =
+  | 'march' | 'shoulder' | 'ankle' | 'sit' | 'chest' | 'hall'
+  | 'treadmill' | 'wallPush' | 'inclinePush' | 'calf' | 'split';
+
+export interface MotionRef {
+  title: string;
+  source: string;
+  guide: string;
+  blurb: string;
+}
+
+export interface RoutineCardData {
+  title: string;
+  defaultKey: MotionKey;
+  copy: string;
+  keys: MotionKey[];
+}
+
 // ---------------------------------------------------------------------------
 // Goals
 // ---------------------------------------------------------------------------
@@ -389,6 +407,60 @@ export function timelineForDay(
   }
 
   return items;
+}
+
+// ---------------------------------------------------------------------------
+// Motion library (exercise video references)
+// ---------------------------------------------------------------------------
+
+export const MOTION_LIBRARY: Record<MotionKey, MotionRef> = {
+  march: { title: 'Easy march in place', source: 'https://www.youtube.com/watch?v=QilgMPG7OaA', guide: '', blurb: 'This covers the gentle march used in your warm-up and the short march finisher in micro-strength.' },
+  shoulder: { title: 'Standing shoulder rolls', source: 'https://www.youtube.com/watch?v=L_neR-zpsBY', guide: '', blurb: 'Use this for the one-minute shoulder-roll slot in your warm-up. Slow circles. No rush.' },
+  ankle: { title: 'Standing ankle circles', source: 'https://www.youtube.com/watch?v=-5fyZUhzpUk', guide: '', blurb: 'This is the ankle-circle slot from your warm-up. Small, controlled circles both directions.' },
+  sit: { title: 'Sit-to-stand / chair stand', source: 'https://www.youtube.com/watch?v=ITv-_BkcrD0', guide: 'https://www.nhs.uk/live-well/exercise/strength-exercises/', blurb: 'This covers sit-to-stand and chair stands. Same pattern, different phrasing.' },
+  chest: { title: 'Wall chest opener', source: 'https://www.youtube.com/watch?v=Xs8oTTFBZ-o', guide: 'https://www.nhs.uk/live-well/exercise/strength-and-flex-exercise-plan-how-to-videos/', blurb: 'Use this for the wall chest opener / chest opener line in the warm-up sequence.' },
+  hall: { title: 'Indoor hallway walk', source: 'https://www.youtube.com/watch?v=SPTWBCwAZEs', guide: '', blurb: 'This stands in for your short hallway walk: easy indoor steps, upright posture, boring on purpose.' },
+  treadmill: { title: 'Treadmill walking form', source: 'https://www.youtube.com/watch?v=xCzORpynOm8', guide: '', blurb: 'This is the real-motion reference for your treadmill block across all four phases.' },
+  wallPush: { title: 'Wall push-up', source: 'https://www.youtube.com/watch?v=wIPJvBQs7RA', guide: 'https://www.nhs.uk/live-well/exercise/strength-exercises/', blurb: 'This is the phase 1-2 push pattern in your plan.' },
+  inclinePush: { title: 'Incline push-up', source: 'https://www.youtube.com/watch?v=cfns5VDVVvk', guide: '', blurb: 'This replaces wall push-ups in phases 3-4 once your floor is more stable.' },
+  calf: { title: 'Standing calf raises', source: 'https://www.youtube.com/watch?v=k8ipHzKeAkQ', guide: 'https://www.acefitness.org/resources/everyone/exercise-library/73/standing-calf-raises-wall/', blurb: 'This is the calf-raise slot from your strength block.' },
+  split: { title: 'Supported split squat to chair', source: 'https://www.youtube.com/watch?v=nXgZ0smNacE', guide: '', blurb: 'This is the phase 4 leg pattern upgrade from sit-to-stand.' },
+};
+
+export function todayMotionKeys(day: number): MotionKey[] {
+  const phase = phaseForDay(day);
+  const keys: MotionKey[] = [
+    'march', 'shoulder', 'ankle', 'sit', 'chest', 'hall', 'treadmill',
+    phase >= 3 ? 'inclinePush' : 'wallPush',
+    phase >= 4 ? 'split' : 'sit',
+    'calf',
+  ];
+  // dedupe while preserving order
+  return [...new Set(keys)];
+}
+
+export function youtubeThumb(source: string): string {
+  const m = source.match(/[?&]v=([^&]+)/);
+  return m ? `https://i.ytimg.com/vi/${m[1]}/hqdefault.jpg` : '';
+}
+
+export function routineCardsForDay(day: number): RoutineCardData[] {
+  const phase = phaseForDay(day);
+  const plan = planForDay(day, 4); // movement doesn't depend on meal mode
+  const pushKey: MotionKey = phase >= 3 ? 'inclinePush' : 'wallPush';
+  const legKey: MotionKey = phase >= 4 ? 'split' : 'sit';
+
+  return [
+    { title: 'Warm-up sequence', defaultKey: 'march', copy: plan.movement.warmup, keys: ['march', 'shoulder', 'ankle', 'sit', 'chest', 'hall'] },
+    { title: 'Treadmill walk', defaultKey: 'treadmill', copy: plan.movement.treadmill, keys: ['treadmill'] },
+    { title: 'Push pattern', defaultKey: pushKey, copy: phase >= 3 ? 'Incline push-up pattern for this phase.' : 'Wall push-up pattern for this phase.', keys: [pushKey] },
+    { title: 'Leg + calf pattern', defaultKey: legKey, copy: plan.movement.strength, keys: [...new Set([legKey, 'calf', 'march'] as MotionKey[])] },
+  ];
+}
+
+export function movementCoverageNote(day: number): string {
+  const phase = phaseForDay(day);
+  return `Covered from your file: easy march, shoulder rolls, ankle circles, sit-to-stand / chair stands, wall chest opener, hallway walk, treadmill walk, ${phase >= 3 ? 'incline push-up' : 'wall push-up'}, calf raises${phase >= 4 ? ', and split squat to chair' : ''}.`;
 }
 
 // ---------------------------------------------------------------------------
