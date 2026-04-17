@@ -35,8 +35,16 @@ export interface Meal {
   label: string;
   time: string;
   title: string;
-  items: string[];
+  items: FoodItem[];
   drink: string;
+}
+
+export interface FoodItem {
+  name: string;          // short display name (e.g. "Grilled chicken breast")
+  portion: string;       // the exact portion (e.g. "8 oz")
+  description: string;   // full description from the original plan
+  imageUrl: string;      // photo URL for the food
+  portionHint: string;   // a visual/plain-english equivalent (e.g. "roughly a deck of cards")
 }
 
 export interface MovementPlan {
@@ -62,7 +70,11 @@ export interface AppState {
   height: string;
   startWeight: number;
   currentWeight: number;
-  age: string;
+  /**
+   * ISO date string (YYYY-MM-DD). Kept backend-only — the UI shows the computed
+   * age, never the birthdate itself.
+   */
+  birthdate: string;
   selectedDay: number;
   mealMode: MealMode;
   goal: GoalKey;
@@ -189,6 +201,26 @@ export const GUARDRAILS: GuardrailItem[] = [
 ];
 
 // ---------------------------------------------------------------------------
+// Age (computed from birthdate — never shows the birthdate itself)
+// ---------------------------------------------------------------------------
+
+/**
+ * Compute integer age in full years from an ISO date string.
+ * `now` is injectable so the "clock" re-evaluates on every render and the
+ * number ticks up the day a birthday passes.
+ */
+export function computeAge(birthdate: string, now: Date = new Date()): number {
+  const b = new Date(birthdate);
+  if (Number.isNaN(b.getTime())) return 0;
+  let age = now.getFullYear() - b.getFullYear();
+  const monthDiff = now.getMonth() - b.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < b.getDate())) {
+    age -= 1;
+  }
+  return age;
+}
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
@@ -250,25 +282,54 @@ const MOVEMENT_BY_PHASE: Record<Phase, MovementPlan> = {
 // Meal plans
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Food image library (Unsplash URLs — stable, free, and swap-friendly)
+// Replace these with real photography later.
+// ---------------------------------------------------------------------------
+
+const IMG = {
+  chicken:     'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=800&q=80',
+  vegetables:  'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=800&q=80',
+  beans:       'https://images.unsplash.com/photo-1604935197115-8f94a1c8e142?w=800&q=80',
+  sweetPotato: 'https://images.unsplash.com/photo-1596097635121-14b38c5d7a55?w=800&q=80',
+  fruit:       'https://images.unsplash.com/photo-1502741338009-cac2772e18bc?w=800&q=80',
+  berries:     'https://images.unsplash.com/photo-1615485925600-97237c4fc1ec?w=800&q=80',
+  eggWhites:   'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=800&q=80',
+  yogurt:      'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&q=80',
+  tuna:        'https://images.unsplash.com/photo-1600803907087-f56d462fd26b?w=800&q=80',
+  salad:       'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80',
+  fish:        'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=800&q=80',
+  edamame:     'https://images.unsplash.com/photo-1564834744159-ff0ea41ba4b9?w=800&q=80',
+  psyllium:    'https://images.unsplash.com/photo-1559847844-5315695dadae?w=800&q=80',
+};
+
 function meals2(): Meal[] {
   return [
     {
       key: 'meal1', label: 'Meal 1', time: '12:00 PM', title: 'Protein plate + produce',
       items: [
-        '8 oz grilled chicken breast, turkey breast, white fish, or tuna in water',
-        '2 cups broccoli, green beans, spinach, zucchini, cauliflower, or mixed vegetables',
-        '1 cup lentils or black beans OR 1 medium sweet potato',
-        '1 piece fruit: apple, orange, or 1 cup berries',
+        { name: 'Lean protein', portion: '8 oz', description: 'Grilled chicken breast, turkey breast, white fish, or tuna in water',
+          imageUrl: IMG.chicken, portionHint: 'About the size of your palm + fingers' },
+        { name: 'Vegetables', portion: '2 cups', description: 'Broccoli, green beans, spinach, zucchini, cauliflower, or mixed vegetables',
+          imageUrl: IMG.vegetables, portionHint: 'Roughly two clenched fists' },
+        { name: 'Smart carb', portion: '1 cup or 1 medium', description: 'Lentils, black beans, OR 1 medium sweet potato',
+          imageUrl: IMG.beans, portionHint: 'One closed fist' },
+        { name: 'Fruit', portion: '1 piece', description: 'Apple, orange, or 1 cup berries',
+          imageUrl: IMG.fruit, portionHint: 'One whole piece, or a cupped hand of berries' },
       ],
       drink: 'Drink lane: 16.9-24 oz water or sparkling water. Hydration helps appetite control, bowel regularity, and exercise tolerance.',
     },
     {
       key: 'meal2', label: 'Meal 2', time: '6:30 PM', title: 'Protein plate + salad',
       items: [
-        '8 oz lean protein: chicken, turkey, shrimp, cod, tuna, or 99% lean ground turkey',
-        'Huge salad bowl or 2 cups cooked vegetables',
-        '1 cup beans OR 1 medium sweet potato if you skipped it earlier',
-        'Optional: 1 cup fat-free Greek yogurt with cinnamon if hunger is loud',
+        { name: 'Lean protein (again)', portion: '8 oz', description: 'Chicken, turkey, shrimp, cod, tuna, or 99% lean ground turkey',
+          imageUrl: IMG.chicken, portionHint: 'About the size of your palm + fingers' },
+        { name: 'Salad or vegetables', portion: '2 cups cooked or huge salad bowl', description: 'Large bowl of salad greens, or 2 cups cooked vegetables',
+          imageUrl: IMG.salad, portionHint: 'Fill the plate. Twice.' },
+        { name: 'Smart carb (optional)', portion: '1 cup or 1 medium', description: 'Beans OR 1 medium sweet potato if you skipped it earlier',
+          imageUrl: IMG.sweetPotato, portionHint: 'One closed fist' },
+        { name: 'Greek yogurt (optional)', portion: '1 cup', description: 'Fat-free Greek yogurt with cinnamon if hunger is loud',
+          imageUrl: IMG.yogurt, portionHint: 'Only if you actually need it' },
       ],
       drink: 'Drink lane: another 16.9-24 oz water or unsweet tea. Blood sugar and late-night eating go worse when hydration is sloppy.',
     },
@@ -280,35 +341,46 @@ function meals4(): Meal[] {
     {
       key: 'meal1', label: 'Meal 1', time: '8:30 AM', title: 'Small protein start',
       items: [
-        '1 cup egg whites or 6 oz fat-free Greek yogurt',
-        '1 cup berries',
-        'Optional: 1 serving psyllium in water only if your doctor is okay with it',
+        { name: 'Egg whites or yogurt', portion: '1 cup egg whites OR 6 oz yogurt', description: '1 cup egg whites OR 6 oz fat-free Greek yogurt',
+          imageUrl: IMG.eggWhites, portionHint: 'About the size of a small coffee cup' },
+        { name: 'Berries', portion: '1 cup', description: '1 cup berries (fresh or frozen)',
+          imageUrl: IMG.berries, portionHint: 'One cupped hand' },
+        { name: 'Psyllium (optional)', portion: '1 serving', description: '1 serving psyllium in water, only if your doctor is okay with it',
+          imageUrl: IMG.psyllium, portionHint: 'Stir into a full glass of water' },
       ],
       drink: 'Drink lane: 16.9 oz water. The early bottle makes the total day much easier.',
     },
     {
       key: 'meal2', label: 'Meal 2', time: '12:30 PM', title: 'Lean protein lunch',
       items: [
-        '6-7 oz chicken, turkey, tuna in water, or white fish',
-        '2 cups vegetables',
-        '1/2-1 cup beans or lentils',
+        { name: 'Lean protein', portion: '6-7 oz', description: 'Chicken, turkey, tuna in water, or white fish',
+          imageUrl: IMG.chicken, portionHint: 'Size of your palm' },
+        { name: 'Vegetables', portion: '2 cups', description: '2 cups vegetables of your choice',
+          imageUrl: IMG.vegetables, portionHint: 'Roughly two clenched fists' },
+        { name: 'Beans or lentils', portion: '1/2 - 1 cup', description: '1/2 to 1 cup beans or lentils',
+          imageUrl: IMG.beans, portionHint: 'Half to one closed fist' },
       ],
       drink: 'Drink lane: 16.9-20 oz water or sparkling water. Keeps the meal filling without adding calories.',
     },
     {
       key: 'meal3', label: 'Meal 3', time: '4:00 PM', title: 'Bridge snack',
       items: [
-        '1 can low-sodium tuna OR 1 cup fat-free Greek yogurt OR 1 cup edamame',
-        '1 piece fruit or cucumber/carrot sticks',
+        { name: 'Protein (pick one)', portion: '1 serving', description: '1 can low-sodium tuna OR 1 cup fat-free Greek yogurt OR 1 cup edamame',
+          imageUrl: IMG.tuna, portionHint: 'One can, cup, or pod handful' },
+        { name: 'Fruit or veg', portion: '1 serving', description: '1 piece fruit or cucumber/carrot sticks',
+          imageUrl: IMG.fruit, portionHint: 'Whole fruit or a handful of sticks' },
       ],
       drink: 'Drink lane: 12-16 oz water or unsweet tea. Helps you not maul dinner.',
     },
     {
       key: 'meal4', label: 'Meal 4', time: '7:30 PM', title: 'Lean dinner',
       items: [
-        '6-8 oz lean protein',
-        '2 cups vegetables or salad',
-        '1 small sweet potato or 1/2 cup beans if still hungry',
+        { name: 'Lean protein', portion: '6-8 oz', description: '6-8 oz lean protein',
+          imageUrl: IMG.fish, portionHint: 'Size of your palm + fingers' },
+        { name: 'Vegetables or salad', portion: '2 cups', description: '2 cups vegetables or salad',
+          imageUrl: IMG.salad, portionHint: 'Pile it high' },
+        { name: 'Sweet potato or beans (optional)', portion: '1 small or 1/2 cup', description: '1 small sweet potato or 1/2 cup beans if still hungry',
+          imageUrl: IMG.sweetPotato, portionHint: 'Only if you genuinely still need it' },
       ],
       drink: 'Drink lane: 16.9-20 oz water. Finish the quota here, not with snacks.',
     },
@@ -399,7 +471,8 @@ export function timelineForDay(
   ];
 
   plan.meals.forEach((meal) => {
-    items.push({ key: meal.key, time: meal.time, title: meal.label, copy: [meal.title, ...meal.items].join(' · ') });
+    const itemSummary = meal.items.map((it) => `${it.portion} ${it.name.toLowerCase()}`).join(' · ');
+    items.push({ key: meal.key, time: meal.time, title: meal.label, copy: `${meal.title} · ${itemSummary}` });
   });
 
   if (isWeighDay(day)) {
@@ -458,6 +531,18 @@ export function routineCardsForDay(day: number): RoutineCardData[] {
   ];
 }
 
+/** Map a dashboard directive type to the motion key that best represents it. */
+export function directiveToMotionKey(
+  directive: 'warmup' | 'treadmill' | 'strength',
+  day: number,
+): MotionKey {
+  if (directive === 'warmup') return 'march';
+  if (directive === 'treadmill') return 'treadmill';
+  // strength
+  const phase = phaseForDay(day);
+  return phase >= 3 ? 'inclinePush' : 'wallPush';
+}
+
 export function movementCoverageNote(day: number): string {
   const phase = phaseForDay(day);
   return `Covered from your file: easy march, shoulder rolls, ankle circles, sit-to-stand / chair stands, wall chest opener, hallway walk, treadmill walk, ${phase >= 3 ? 'incline push-up' : 'wall push-up'}, calf raises${phase >= 4 ? ', and split squat to chair' : ''}.`;
@@ -472,7 +557,8 @@ export function createDefaultState(): AppState {
     height: `6'3"`,
     startWeight: 225,
     currentWeight: 225,
-    age: '',
+    /** May 1, 1985 — stored backend-only, UI only ever shows the derived age. */
+    birthdate: '1985-05-01',
     selectedDay: 1,
     mealMode: 4,
     goal: 'stability',

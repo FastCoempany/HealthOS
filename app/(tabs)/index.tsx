@@ -1,10 +1,13 @@
 /**
- * FACE 1 — Dashboard
+ * Dashboard
  *
  * "Today's directives" — the first screen the user sees.
  * Shows: day selector, directive cards (warm-up / treadmill / strength / food),
- * hydration tracker, goal mode selector, triage panel (vitals + labs),
- * and the 60-day arc overview.
+ * hydration tracker with goal mode selector, 60-day arc overview.
+ *
+ * Directive cards are clickable:
+ *   - Warm-up / Treadmill / Micro-strength -> Movement tab with that motion preselected
+ *   - Food plan -> Nutrition tab
  */
 
 import React, { useState, useCallback } from 'react';
@@ -18,10 +21,9 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 
-import { Palette, FlagColors } from '@/constants/theme';
+import { Palette } from '@/constants/theme';
 import {
   GOALS,
-  LABS,
   ARC_PHASES,
   type GoalKey,
   type MealMode,
@@ -31,12 +33,9 @@ import {
   bottleCount,
   blockForDay,
   daysInBlock,
+  directiveToMotionKey,
   createDefaultState,
 } from '@/constants/health-data';
-
-// ---------------------------------------------------------------------------
-// State (in-memory for mockup; will be replaced with persistent store)
-// ---------------------------------------------------------------------------
 
 const initial = createDefaultState();
 
@@ -55,8 +54,7 @@ export default function DashboardScreen() {
   const oz = waterOz(startWeight, hydrationFactor);
   const bottles = bottleCount(startWeight, hydrationFactor);
 
-  // -- Day selector helpers --
-  const { start: blockStart, end: blockEnd } = daysInBlock(currentBlock);
+  const { start: blockStart } = daysInBlock(currentBlock);
   const blockDays = Array.from({ length: 15 }, (_, i) => blockStart + i);
 
   const selectGoal = useCallback((key: GoalKey) => {
@@ -66,9 +64,17 @@ export default function DashboardScreen() {
     setMealMode(g.meals);
   }, []);
 
-  // ---------------------------------------------------------------------------
-  // Render
-  // ---------------------------------------------------------------------------
+  const goToMotion = useCallback((kind: 'warmup' | 'treadmill' | 'strength') => {
+    router.push({
+      pathname: '/(tabs)/movement',
+      params: { motion: directiveToMotionKey(kind, selectedDay) },
+    });
+  }, [router, selectedDay]);
+
+  const goToNutrition = useCallback(() => {
+    router.push('/(tabs)/nutrition');
+  }, [router]);
+
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
@@ -83,20 +89,17 @@ export default function DashboardScreen() {
         <View style={styles.card}>
           <Text style={styles.eyebrow}>DAY SELECTOR</Text>
           <View style={styles.blockRow}>
-            {[0, 1, 2, 3].map((b) => {
-              const { start } = daysInBlock(b);
-              return (
-                <Pressable
-                  key={b}
-                  style={[styles.blockPick, b === currentBlock && styles.blockPickActive]}
-                  onPress={() => { setCurrentBlock(b); setSelectedDay(start); }}
-                >
-                  <Text style={[styles.blockPickText, b === currentBlock && styles.blockPickTextActive]}>
-                    {b === 0 ? '1-15' : b === 1 ? '16-30' : b === 2 ? '31-45' : '46-60'}
-                  </Text>
-                </Pressable>
-              );
-            })}
+            {[0, 1, 2, 3].map((b) => (
+              <Pressable
+                key={b}
+                style={[styles.blockPick, b === currentBlock && styles.blockPickActive]}
+                onPress={() => { setCurrentBlock(b); setSelectedDay(daysInBlock(b).start); }}
+              >
+                <Text style={[styles.blockPickText, b === currentBlock && styles.blockPickTextActive]}>
+                  {b === 0 ? '1-15' : b === 1 ? '16-30' : b === 2 ? '31-45' : '46-60'}
+                </Text>
+              </Pressable>
+            ))}
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dayStrip}>
             {blockDays.map((d) => (
@@ -111,9 +114,7 @@ export default function DashboardScreen() {
               </Pressable>
             ))}
           </ScrollView>
-          <Text style={styles.hint}>
-            Day {selectedDay} · Phase {phase} of 4
-          </Text>
+          <Text style={styles.hint}>Day {selectedDay} · Phase {phase} of 4</Text>
         </View>
 
         {/* ---- Today's directives ---- */}
@@ -127,18 +128,21 @@ export default function DashboardScreen() {
             title="Warm-up"
             time={plan.movementTime}
             copy={plan.movement.warmup}
+            onPress={() => goToMotion('warmup')}
           />
           <DirectiveCard
             icon="~"
             title="Treadmill"
             time={addMins(plan.movementTime, 6)}
             copy={plan.movement.treadmill}
+            onPress={() => goToMotion('treadmill')}
           />
           <DirectiveCard
             icon="#"
             title="Micro-strength"
             time={addMins(plan.movementTime, 18)}
             copy={plan.movement.strength}
+            onPress={() => goToMotion('strength')}
           />
           <DirectiveCard
             icon="+"
@@ -146,6 +150,7 @@ export default function DashboardScreen() {
             time={plan.meals[0].time}
             copy={`${mealMode} meals today · ${bottles} bottles of 16.9 oz water`}
             tags={plan.meals.map((m) => `${m.label}: ${m.title}`)}
+            onPress={goToNutrition}
           />
         </View>
 
@@ -163,7 +168,6 @@ export default function DashboardScreen() {
             </Text>
           </View>
 
-          {/* Goal chips */}
           <Text style={styles.miniHead}>Priority mode</Text>
           <View style={styles.chipRow}>
             {(Object.keys(GOALS) as GoalKey[]).map((key) => (
@@ -185,36 +189,6 @@ export default function DashboardScreen() {
               {GOALS[goal].meals} meals.
             </Text>
           </View>
-        </View>
-
-        {/* ---- Triage panel ---- */}
-        <View style={styles.card}>
-          <Text style={styles.eyebrow}>TRIAGE</Text>
-          <Text style={styles.hint}>The problem in plain sight.</Text>
-
-          {/* Vitals */}
-          <View style={styles.vitalsGrid}>
-            <VitalCell label="Age" value={initial.age || '--'} />
-            <VitalCell label="Height" value={initial.height} />
-            <VitalCell label="Starting weight" value={String(initial.startWeight)} />
-            <VitalCell label="Priority mode" value={GOALS[goal].label} />
-          </View>
-
-          {/* Labs */}
-          <Text style={[styles.miniHead, { marginTop: 14 }]}>Lab values</Text>
-          {LABS.map((lab) => (
-            <View key={lab.name} style={styles.labRow}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.labName}>
-                  {lab.name}: {lab.value}
-                </Text>
-                <Text style={styles.hint}>{lab.note}</Text>
-              </View>
-              <Text style={[styles.labFlag, { color: FlagColors[lab.flag] }]}>
-                {lab.flag === 'bad' ? 'PRIORITY' : lab.flag === 'warn' ? 'WATCH' : 'SOLID'}
-              </Text>
-            </View>
-          ))}
         </View>
 
         {/* ---- 60-day arc ---- */}
@@ -253,15 +227,23 @@ function DirectiveCard({
   time,
   copy,
   tags,
+  onPress,
 }: {
   icon: string;
   title: string;
   time: string;
   copy: string;
   tags?: string[];
+  onPress: () => void;
 }) {
   return (
-    <View style={styles.todoCard}>
+    <Pressable
+      style={({ pressed }) => [
+        styles.todoCard,
+        pressed && styles.todoCardPressed,
+      ]}
+      onPress={onPress}
+    >
       <View style={styles.todoTop}>
         <View style={styles.todoIcon}>
           <Text style={styles.todoIconText}>{icon}</Text>
@@ -284,23 +266,13 @@ function DirectiveCard({
               ))}
             </View>
           )}
+          <Text style={styles.tapHint}>Tap to open ›</Text>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
-function VitalCell({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={styles.vitalCell}>
-      <Text style={styles.vitalValue}>{value}</Text>
-      <Text style={styles.vitalLabel}>{label}</Text>
-    </View>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Tiny helper (simplified from HTML)
 // ---------------------------------------------------------------------------
 
 function addMins(time: string, mins: number): string {
@@ -325,10 +297,7 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   content: { padding: 16, paddingBottom: 40, gap: 16 },
 
-  header: {
-    paddingVertical: 16,
-    paddingHorizontal: 4,
-  },
+  header: { paddingVertical: 16, paddingHorizontal: 4 },
   brandTitle: { fontSize: 22, fontWeight: '800', letterSpacing: -0.5, color: Palette.ink },
   brandSub: { fontSize: 13, color: Palette.muted, marginTop: 2 },
 
@@ -341,32 +310,11 @@ const styles = StyleSheet.create({
     gap: 10,
   },
 
-  eyebrow: {
-    fontSize: 11,
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-    color: '#8a939b',
-  },
-  sectionTitle: {
-    fontSize: 26,
-    fontWeight: '800',
-    letterSpacing: -1.5,
-    color: Palette.ink,
-  },
-  miniHead: {
-    fontSize: 11,
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
-    color: '#7b8590',
-    fontWeight: '800',
-    marginTop: 6,
-  },
+  eyebrow: { fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: '#8a939b' },
+  sectionTitle: { fontSize: 26, fontWeight: '800', letterSpacing: -1.5, color: Palette.ink },
+  miniHead: { fontSize: 11, letterSpacing: 1.5, textTransform: 'uppercase', color: '#7b8590', fontWeight: '800', marginTop: 6 },
   hint: { fontSize: 13, color: Palette.muted, lineHeight: 19 },
-  divider: {
-    height: 1,
-    backgroundColor: Palette.line2,
-    borderRadius: 999,
-  },
+  divider: { height: 1, backgroundColor: Palette.line2, borderRadius: 999 },
 
   // Day selector
   blockRow: { flexDirection: 'row', gap: 8 },
@@ -378,83 +326,60 @@ const styles = StyleSheet.create({
     borderColor: Palette.line,
     backgroundColor: 'rgba(255,255,255,0.96)',
   },
-  blockPickActive: {
-    backgroundColor: Palette.blue,
-    borderColor: Palette.blue,
-  },
+  blockPickActive: { backgroundColor: Palette.blue, borderColor: Palette.blue },
   blockPickText: { fontSize: 12, fontWeight: '800', color: '#52606a', letterSpacing: 0.5 },
   blockPickTextActive: { color: '#fff' },
   dayStrip: { marginTop: 8 },
   dayChip: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: Palette.line,
+    width: 40, height: 40, borderRadius: 20,
+    borderWidth: 1, borderColor: Palette.line,
     backgroundColor: 'rgba(255,255,255,0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'center', alignItems: 'center',
     marginRight: 8,
   },
-  dayChipActive: {
-    backgroundColor: Palette.orange,
-    borderColor: Palette.orange,
-  },
+  dayChipActive: { backgroundColor: Palette.orange, borderColor: Palette.orange },
   dayChipText: { fontSize: 14, fontWeight: '900', color: Palette.ink },
   dayChipTextActive: { color: '#fff' },
 
   // Directive cards
   todoCard: {
-    borderWidth: 1,
-    borderColor: Palette.line,
-    borderRadius: 18,
-    padding: 14,
-    backgroundColor: 'rgba(255,255,255,0.55)',
+    borderWidth: 1, borderColor: Palette.line, borderRadius: 18,
+    padding: 14, backgroundColor: 'rgba(255,255,255,0.55)',
+  },
+  todoCardPressed: {
+    backgroundColor: 'rgba(37,103,255,0.08)',
+    borderColor: Palette.blue2,
   },
   todoTop: { flexDirection: 'row', gap: 12 },
   todoIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: 40, height: 40, borderRadius: 14,
+    justifyContent: 'center', alignItems: 'center',
     backgroundColor: 'rgba(37,103,255,0.14)',
-    borderWidth: 1,
-    borderColor: Palette.line,
+    borderWidth: 1, borderColor: Palette.line,
   },
   todoIconText: { fontSize: 18, fontWeight: '800', color: Palette.ink },
-  todoTopLine: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
+  todoTopLine: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   todoTitle: { fontSize: 16, fontWeight: '900', letterSpacing: -0.3, color: Palette.ink },
   todoCopy: { fontSize: 13.5, color: '#50606c', lineHeight: 20 },
   timeChip: {
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 999,
-    backgroundColor: 'rgba(37,103,255,0.08)',
+    paddingVertical: 5, paddingHorizontal: 10,
+    borderRadius: 999, backgroundColor: 'rgba(37,103,255,0.08)',
   },
   timeChipText: { fontSize: 12, fontWeight: '800', color: '#254bb7' },
   tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 },
   miniTag: {
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 8,
+    paddingVertical: 4, paddingHorizontal: 8, borderRadius: 8,
     backgroundColor: 'rgba(235,106,45,0.12)',
-    borderWidth: 1,
-    borderColor: 'rgba(37,103,255,0.25)',
+    borderWidth: 1, borderColor: 'rgba(37,103,255,0.25)',
   },
   miniTagText: { fontSize: 11, fontWeight: '700', color: '#1b263b' },
+  tapHint: { marginTop: 8, fontSize: 11, fontWeight: '800', color: Palette.blue, letterSpacing: 0.5 },
 
-  // Water / hydration
+  // Water
   waterBanner: {
-    padding: 16,
-    borderRadius: 20,
+    padding: 16, borderRadius: 20,
     backgroundColor: 'rgba(238,248,255,0.95)',
-    borderWidth: 1,
-    borderColor: 'rgba(86,166,255,0.20)',
+    borderWidth: 1, borderColor: 'rgba(86,166,255,0.20)',
     gap: 6,
   },
   waterBig: { fontSize: 28, fontWeight: '800', letterSpacing: -1, color: Palette.ink },
@@ -463,68 +388,25 @@ const styles = StyleSheet.create({
   // Goal chips
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   goalChip: {
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: Palette.line,
+    paddingVertical: 10, paddingHorizontal: 14, borderRadius: 999,
+    borderWidth: 1, borderColor: Palette.line,
     backgroundColor: 'rgba(255,255,255,0.96)',
   },
-  goalChipActive: {
-    backgroundColor: Palette.green,
-    borderColor: Palette.green,
-  },
+  goalChipActive: { backgroundColor: Palette.green, borderColor: Palette.green },
   goalChipText: { fontSize: 13, fontWeight: '800', color: Palette.ink },
   goalChipTextActive: { color: '#fff' },
 
-  // Status box
   statusBox: {
-    padding: 14,
-    borderRadius: 18,
+    padding: 14, borderRadius: 18,
     backgroundColor: 'rgba(255,255,255,0.55)',
-    borderWidth: 1,
-    borderColor: Palette.line,
-    gap: 4,
+    borderWidth: 1, borderColor: Palette.line, gap: 4,
   },
   statusBold: { fontSize: 15, fontWeight: '800', letterSpacing: -0.3, color: Palette.ink },
 
-  // Vitals
-  vitalsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginTop: 10,
-  },
-  vitalCell: {
-    flex: 1,
-    minWidth: '45%',
-    padding: 12,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255,255,255,0.55)',
-    borderWidth: 1,
-    borderColor: Palette.line,
-  },
-  vitalValue: { fontSize: 20, fontWeight: '800', letterSpacing: -0.5, color: Palette.ink },
-  vitalLabel: { fontSize: 12, color: Palette.muted, marginTop: 2 },
-
-  // Labs
-  labRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: Palette.line,
-  },
-  labName: { fontSize: 14, fontWeight: '700', color: Palette.ink },
-  labFlag: { fontSize: 11, fontWeight: '800', letterSpacing: 1 },
-
   // Arc
   arcCard: {
-    padding: 14,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: Palette.line,
+    padding: 14, borderRadius: 18,
+    borderWidth: 1, borderColor: Palette.line,
     backgroundColor: 'rgba(255,255,255,0.88)',
     gap: 4,
   },
@@ -534,10 +416,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(37,103,255,0.06)',
   },
   arcDays: {
-    fontSize: 11,
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
-    color: '#7f8891',
+    fontSize: 11, letterSpacing: 1.5, textTransform: 'uppercase', color: '#7f8891',
   },
   arcTitle: { fontSize: 16, fontWeight: '800', letterSpacing: -0.3, color: Palette.ink },
 });

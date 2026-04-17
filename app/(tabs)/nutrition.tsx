@@ -1,9 +1,11 @@
 /**
- * FACE 2 — Nutrition
+ * Nutrition
  *
  * "Food plan. Eat exactly what is here."
- * Shows: 2/4 meal toggle, full meal cards with items + drink lanes + macro tags,
- * grocery companion weekly list, and shop shortcuts (Amazon / Walmart / Instacart).
+ *
+ * Each meal is a big clickable card that routes to /meal/[id] where the user
+ * sees exact pictures and portions for that meal. The 2/4 meal toggle, grocery
+ * companion, and shop shortcuts remain on this page.
  */
 
 import React, { useState } from 'react';
@@ -16,14 +18,14 @@ import {
   Linking,
   SafeAreaView,
 } from 'react-native';
+import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 
 import { Palette } from '@/constants/theme';
 import {
   type MealMode,
   type Meal,
   planForDay,
-  waterOz,
-  bottleCount,
   groceryList,
   createDefaultState,
 } from '@/constants/health-data';
@@ -56,14 +58,12 @@ const SHOP_ITEMS: ShopItem[] = [
   { label: 'Optional psyllium', searches: [{ store: 'Amazon', term: 'psyllium husk powder' }, { store: 'Walmart', term: 'psyllium fiber supplement' }, { store: 'Instacart', term: 'psyllium husk powder' }] },
 ];
 
-const FOOD_EMOJIS = ['\uD83C\uDF57', '\uD83E\uDD66', '\uD83E\uDED8', '\uD83C\uDF4E', '\uD83E\uDD63', '\uD83E\uDD55'];
-const MACRO_TAGS = ['Protein anchored', 'Fiber heavy', 'No bread', 'No added sugar', 'Low sodium'];
-
 // ---------------------------------------------------------------------------
 // Screen
 // ---------------------------------------------------------------------------
 
 export default function NutritionScreen() {
+  const router = useRouter();
   const [mealMode, setMealMode] = useState<MealMode>(initial.mealMode);
   const [selectedDay] = useState(initial.selectedDay);
 
@@ -71,6 +71,10 @@ export default function NutritionScreen() {
   const startWeight = initial.startWeight;
   const hydrationFactor = initial.hydrationFactor;
   const grocery = groceryList(mealMode, startWeight, hydrationFactor);
+
+  const openMeal = (mealKey: string) => {
+    router.push({ pathname: '/meal/[id]', params: { id: mealKey, mealMode: String(mealMode) } });
+  };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -81,6 +85,9 @@ export default function NutritionScreen() {
           <Text style={styles.eyebrow}>NUTRITION ENGINE</Text>
           <Text style={styles.sectionTitle}>
             Food plan.{'\n'}Eat exactly what is here.
+          </Text>
+          <Text style={styles.hint}>
+            Tap any meal below to see the exact pictures and portions for that time of day.
           </Text>
 
           {/* 2/4 meal toggle */}
@@ -104,39 +111,25 @@ export default function NutritionScreen() {
           </View>
         </View>
 
-        {/* ---- Meal cards ---- */}
+        {/* ---- Meal buttons ---- */}
         {plan.meals.map((meal) => (
-          <MealCard key={meal.key} meal={meal} />
+          <MealButton key={meal.key} meal={meal} onPress={() => openMeal(meal.key)} />
         ))}
 
         {/* ---- Grocery companion ---- */}
         <View style={styles.card}>
-          <Text style={styles.eyebrow}>GROCERY COMPANION + SHOP SHORTCUTS</Text>
+          <Text style={styles.eyebrow}>GROCERY COMPANION</Text>
           <Text style={styles.hint}>
-            The list below shifts with 2 meals vs 4 meals. The shortcuts open actual search result pages.
+            The list below shifts with 2 meals vs 4 meals.
           </Text>
 
           <View style={styles.groceryHeader}>
             <Text style={styles.groceryTitle}>{mealMode}-meal week list</Text>
             <Text style={styles.hint}>
-              This is the boring weekly load-out that supports the exact meals shown above.
+              The boring weekly load-out that supports the exact meals shown above.
             </Text>
           </View>
 
-          {/* Brand logos row */}
-          <View style={styles.brandRow}>
-            <View style={[styles.brandLogo, { backgroundColor: '#131921' }]}>
-              <Text style={styles.brandLogoText}>Amazon</Text>
-            </View>
-            <View style={[styles.brandLogo, { backgroundColor: '#0071dc' }]}>
-              <Text style={styles.brandLogoText}>Walmart</Text>
-            </View>
-            <View style={[styles.brandLogo, { backgroundColor: '#43b02a' }]}>
-              <Text style={styles.brandLogoText}>Instacart</Text>
-            </View>
-          </View>
-
-          {/* Weekly items */}
           {grocery.map((item, idx) => (
             <View key={idx} style={styles.weekItem}>
               <View style={styles.weekIcon}>
@@ -153,6 +146,17 @@ export default function NutritionScreen() {
         {/* ---- Shop shortcuts ---- */}
         <View style={styles.card}>
           <Text style={styles.eyebrow}>QUICK ORDER LINKS</Text>
+          <View style={styles.brandRow}>
+            <View style={[styles.brandLogo, { backgroundColor: '#131921' }]}>
+              <Text style={styles.brandLogoText}>Amazon</Text>
+            </View>
+            <View style={[styles.brandLogo, { backgroundColor: '#0071dc' }]}>
+              <Text style={styles.brandLogoText}>Walmart</Text>
+            </View>
+            <View style={[styles.brandLogo, { backgroundColor: '#43b02a' }]}>
+              <Text style={styles.brandLogoText}>Instacart</Text>
+            </View>
+          </View>
           {SHOP_ITEMS.map((item, idx) => (
             <View key={idx} style={styles.orderCard}>
               <Text style={styles.orderLabel}>{item.label}</Text>
@@ -177,48 +181,42 @@ export default function NutritionScreen() {
 }
 
 // ---------------------------------------------------------------------------
-// Meal card component
+// Meal button — big clickable card
 // ---------------------------------------------------------------------------
 
-function MealCard({ meal }: { meal: Meal }) {
+function MealButton({ meal, onPress }: { meal: Meal; onPress: () => void }) {
+  // Use the first food item's image as the meal hero shot.
+  const heroImg = meal.items[0]?.imageUrl;
+
   return (
-    <View style={styles.mealCard}>
-      {/* Head */}
-      <View style={styles.mealHead}>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.mealLabel}>{meal.label}</Text>
-          <Text style={styles.hint}>{meal.title}</Text>
-        </View>
-        <View style={styles.timeChip}>
-          <Text style={styles.timeChipText}>{meal.time}</Text>
-        </View>
-      </View>
-
-      {/* Food items */}
-      {meal.items.map((item, idx) => (
-        <View key={idx} style={styles.foodItem}>
-          <View style={styles.foodIcon}>
-            <Text style={{ fontSize: 14 }}>{FOOD_EMOJIS[idx % FOOD_EMOJIS.length]}</Text>
+    <Pressable
+      style={({ pressed }) => [styles.mealButton, pressed && styles.mealButtonPressed]}
+      onPress={onPress}
+    >
+      {/* Hero image strip */}
+      <View style={styles.mealHero}>
+        {heroImg ? (
+          <Image source={{ uri: heroImg }} style={styles.mealHeroImg} contentFit="cover" />
+        ) : (
+          <View style={styles.mealHeroPlaceholder} />
+        )}
+        <View style={styles.mealHeroOverlay}>
+          <View style={styles.mealHeroTime}>
+            <Text style={styles.mealHeroTimeText}>{meal.time}</Text>
           </View>
-          <Text style={styles.foodCopy}>{item}</Text>
         </View>
-      ))}
-
-      {/* Drink lane */}
-      <View style={styles.drinkLane}>
-        <Text style={styles.drinkTitle}>{'\uD83D\uDCA7'} Drink option</Text>
-        <Text style={styles.drinkWhy}>{meal.drink}</Text>
       </View>
 
-      {/* Macro tags */}
-      <View style={styles.macroRow}>
-        {MACRO_TAGS.map((tag, idx) => (
-          <View key={idx} style={styles.macroTag}>
-            <Text style={styles.macroTagText}>{tag}</Text>
-          </View>
-        ))}
+      {/* Body */}
+      <View style={styles.mealBody}>
+        <Text style={styles.mealLabel}>{meal.label}</Text>
+        <Text style={styles.mealTitle}>{meal.title}</Text>
+        <Text style={styles.mealSummary}>
+          {meal.items.map((it) => `${it.portion} ${it.name.toLowerCase()}`).join(' · ')}
+        </Text>
+        <Text style={styles.tapHint}>See exact pictures + portions ›</Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -242,129 +240,101 @@ const styles = StyleSheet.create({
 
   eyebrow: { fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: '#8a939b' },
   sectionTitle: { fontSize: 24, fontWeight: '800', letterSpacing: -1.2, color: Palette.ink, lineHeight: 30 },
-  miniHead: { fontSize: 11, letterSpacing: 1.5, textTransform: 'uppercase', color: '#7b8590', fontWeight: '800' },
   hint: { fontSize: 13, color: Palette.muted, lineHeight: 19 },
 
   // Toggle
   toggleRow: { flexDirection: 'row', gap: 10, marginTop: 4 },
   toggleBtn: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Palette.line,
+    flex: 1, paddingVertical: 14, borderRadius: 16,
+    borderWidth: 1, borderColor: Palette.line,
     backgroundColor: 'rgba(255,255,255,0.96)',
     alignItems: 'center',
   },
-  toggleBtnActive: {
-    backgroundColor: Palette.orange,
-    borderColor: Palette.orange,
-  },
+  toggleBtnActive: { backgroundColor: Palette.orange, borderColor: Palette.orange },
   toggleText: { fontSize: 16, fontWeight: '900', color: Palette.ink },
   toggleTextActive: { color: '#fff' },
 
-  // Meal card
-  mealCard: {
-    backgroundColor: 'rgba(255,250,243,0.96)',
+  // Meal button
+  mealButton: {
     borderRadius: 22,
     borderWidth: 1,
     borderColor: Palette.line,
-    padding: 16,
-    gap: 12,
+    backgroundColor: 'rgba(255,250,243,0.96)',
+    overflow: 'hidden',
   },
-  mealHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 },
-  mealLabel: { fontSize: 17, fontWeight: '800', letterSpacing: -0.3, color: Palette.ink },
-  timeChip: {
+  mealButtonPressed: {
+    borderColor: Palette.blue2,
+    backgroundColor: 'rgba(37,103,255,0.05)',
+  },
+  mealHero: {
+    width: '100%',
+    height: 160,
+    position: 'relative',
+  },
+  mealHeroImg: { ...StyleSheet.absoluteFillObject },
+  mealHeroPlaceholder: { ...StyleSheet.absoluteFillObject, backgroundColor: '#e7dfd0' },
+  mealHeroOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(18,22,27,0.18)',
+    padding: 14,
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+  },
+  mealHeroTime: {
     paddingVertical: 6,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     borderRadius: 999,
-    backgroundColor: 'rgba(37,103,255,0.08)',
+    backgroundColor: 'rgba(255,255,255,0.95)',
   },
-  timeChipText: { fontSize: 12, fontWeight: '800', color: '#254bb7' },
+  mealHeroTimeText: { fontSize: 12, fontWeight: '900', color: '#254bb7' },
 
-  // Food items
-  foodItem: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
-  foodIcon: {
-    width: 26,
-    height: 26,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(30,163,93,0.09)',
+  mealBody: { padding: 16, gap: 6 },
+  mealLabel: {
+    fontSize: 11,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    color: Palette.orange,
+    fontWeight: '800',
   },
-  foodCopy: { flex: 1, fontSize: 14, color: '#283036', lineHeight: 20 },
-
-  // Drink lane
-  drinkLane: {
-    padding: 12,
-    borderRadius: 16,
-    backgroundColor: 'rgba(237,247,255,0.92)',
-    borderWidth: 1,
-    borderColor: 'rgba(86,166,255,0.18)',
-    gap: 6,
-  },
-  drinkTitle: { fontSize: 14, fontWeight: '900', letterSpacing: -0.2, color: Palette.ink },
-  drinkWhy: { fontSize: 13, color: Palette.muted, lineHeight: 19 },
-
-  // Macro tags
-  macroRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  macroTag: {
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 999,
-    backgroundColor: 'rgba(20,23,26,0.05)',
-  },
-  macroTagText: { fontSize: 12, color: '#42505a' },
+  mealTitle: { fontSize: 20, fontWeight: '800', letterSpacing: -0.6, color: Palette.ink },
+  mealSummary: { fontSize: 13, color: Palette.muted, lineHeight: 19 },
+  tapHint: { marginTop: 6, fontSize: 12, fontWeight: '800', color: Palette.blue, letterSpacing: 0.5 },
 
   // Grocery companion
   groceryHeader: { gap: 4 },
   groceryTitle: { fontSize: 17, fontWeight: '800', letterSpacing: -0.3, color: Palette.ink },
-  brandRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-  brandLogo: {
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    minWidth: 88,
-    alignItems: 'center',
-  },
-  brandLogoText: { color: '#fff', fontWeight: '900', fontSize: 13, letterSpacing: -0.3 },
 
   weekItem: {
-    flexDirection: 'row',
-    gap: 10,
-    alignItems: 'flex-start',
-    padding: 12,
-    borderRadius: 16,
+    flexDirection: 'row', gap: 10, alignItems: 'flex-start',
+    padding: 12, borderRadius: 16,
     backgroundColor: 'rgba(255,255,255,0.7)',
-    borderWidth: 1,
-    borderColor: Palette.line,
+    borderWidth: 1, borderColor: Palette.line,
   },
   weekIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: 32, height: 32, borderRadius: 12,
+    justifyContent: 'center', alignItems: 'center',
     backgroundColor: 'rgba(30,163,93,0.16)',
   },
   weekLabel: { fontSize: 14, fontWeight: '800', color: Palette.ink },
 
-  // Shop shortcuts
+  // Shop
+  brandRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
+  brandLogo: {
+    paddingVertical: 8, paddingHorizontal: 14,
+    borderRadius: 12, minWidth: 88, alignItems: 'center',
+  },
+  brandLogoText: { color: '#fff', fontWeight: '900', fontSize: 13, letterSpacing: -0.3 },
+
   orderCard: {
-    padding: 14,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: Palette.line,
-    backgroundColor: 'rgba(255,255,255,0.55)',
-    gap: 8,
+    padding: 14, borderRadius: 18,
+    borderWidth: 1, borderColor: Palette.line,
+    backgroundColor: 'rgba(255,255,255,0.55)', gap: 8,
   },
   orderLabel: { fontSize: 15, fontWeight: '800', letterSpacing: -0.3, color: Palette.ink },
   linkRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   shopLink: {
-    paddingVertical: 7,
-    paddingHorizontal: 10,
-    borderRadius: 999,
-    backgroundColor: 'rgba(37,103,255,0.08)',
+    paddingVertical: 7, paddingHorizontal: 10,
+    borderRadius: 999, backgroundColor: 'rgba(37,103,255,0.08)',
   },
   shopLinkText: { fontSize: 12, fontWeight: '800', color: '#2448a6' },
 });

@@ -7,7 +7,7 @@
  * a coverage note listing every exercise for the current phase.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { Image } from 'expo-image';
+import { useLocalSearchParams } from 'expo-router';
 
 import { Palette } from '@/constants/theme';
 import {
@@ -36,8 +37,16 @@ const initial = createDefaultState();
 const ALL_MOTION_KEYS = Object.keys(MOTION_LIBRARY) as MotionKey[];
 
 export default function MovementScreen() {
+  const params = useLocalSearchParams<{ motion?: string }>();
   const [selectedDay] = useState(initial.selectedDay);
   const [selectedMotion, setSelectedMotion] = useState<MotionKey>('march');
+
+  // Accept a deep-link motion param from the Dashboard directive cards.
+  useEffect(() => {
+    if (params.motion && params.motion in MOTION_LIBRARY) {
+      setSelectedMotion(params.motion as MotionKey);
+    }
+  }, [params.motion]);
 
   const phase = phaseForDay(selectedDay);
   const keysToday = todayMotionKeys(selectedDay);
