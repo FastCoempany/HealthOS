@@ -293,7 +293,7 @@ const IMG = {
   beans:       'https://images.unsplash.com/photo-1604935197115-8f94a1c8e142?w=800&q=80',
   sweetPotato: 'https://images.unsplash.com/photo-1596097635121-14b38c5d7a55?w=800&q=80',
   fruit:       'https://images.unsplash.com/photo-1502741338009-cac2772e18bc?w=800&q=80',
-  berries:     'https://images.unsplash.com/photo-1615485925600-97237c4fc1ec?w=800&q=80',
+  blueberries: 'https://images.unsplash.com/photo-1498557850523-fd3d118b962e?w=800&q=80',
   eggWhites:   'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=800&q=80',
   yogurt:      'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&q=80',
   tuna:        'https://images.unsplash.com/photo-1600803907087-f56d462fd26b?w=800&q=80',
@@ -314,8 +314,8 @@ function meals2(): Meal[] {
           imageUrl: IMG.vegetables, portionHint: 'Roughly two clenched fists' },
         { name: 'Smart carb', portion: '1 cup or 1 medium', description: 'Lentils, black beans, OR 1 medium sweet potato',
           imageUrl: IMG.beans, portionHint: 'One closed fist' },
-        { name: 'Fruit', portion: '1 piece', description: 'Apple, orange, or 1 cup berries',
-          imageUrl: IMG.fruit, portionHint: 'One whole piece, or a cupped hand of berries' },
+        { name: 'Fruit', portion: '1 piece', description: 'Apple, orange, or 1 cup blueberries',
+          imageUrl: IMG.fruit, portionHint: 'One whole piece, or a cupped hand of blueberries' },
       ],
       drink: 'Drink lane: 16.9-24 oz water or sparkling water. Hydration helps appetite control, bowel regularity, and exercise tolerance.',
     },
@@ -343,8 +343,8 @@ function meals4(): Meal[] {
       items: [
         { name: 'Egg whites or yogurt', portion: '1 cup egg whites OR 6 oz yogurt', description: '1 cup egg whites OR 6 oz fat-free Greek yogurt',
           imageUrl: IMG.eggWhites, portionHint: 'About the size of a small coffee cup' },
-        { name: 'Berries', portion: '1 cup', description: '1 cup berries (fresh or frozen)',
-          imageUrl: IMG.berries, portionHint: 'One cupped hand' },
+        { name: 'Blueberries', portion: '1 cup', description: '1 cup blueberries (fresh or frozen) — lowest glycemic berry, best for your A1c and LDL',
+          imageUrl: IMG.blueberries, portionHint: 'One cupped hand' },
         { name: 'Psyllium (optional)', portion: '1 serving', description: '1 serving psyllium in water, only if your doctor is okay with it',
           imageUrl: IMG.psyllium, portionHint: 'Stir into a full glass of water' },
       ],
@@ -388,31 +388,240 @@ function meals4(): Meal[] {
 }
 
 // ---------------------------------------------------------------------------
-// Grocery lists
+// Grocery lists — precise weekly shopping list
 // ---------------------------------------------------------------------------
 
-export function groceryList(mealMode: MealMode, startWeight: number, hydrationFactor: number): GroceryItem[] {
-  const weeklyBottles = (Math.ceil((waterOz(startWeight, hydrationFactor) * 7) / 16.9 * 10) / 10).toFixed(1);
+export interface GrocerySection {
+  section: string;
+  items: GroceryLineItem[];
+}
+
+export interface GroceryLineItem {
+  name: string;
+  qty: string;
+  note: string;
+}
+
+/**
+ * Returns a precise weekly grocery list you can take straight to the store.
+ * Quantities are computed from: 7 days × meal count × portion sizes.
+ */
+export function weeklyGroceryList(mealMode: MealMode, startWeight: number, hydrationFactor: number): GrocerySection[] {
+  const wOz = waterOz(startWeight, hydrationFactor);
+  const weeklyOz = wOz * 7;
+  const weeklyBottles = Math.ceil(weeklyOz / 16.9);
 
   if (mealMode === 2) {
+    // 2 meals/day: Meal 1 (12 PM) + Meal 2 (6:30 PM) × 7 days = 14 plates
     return [
-      { emoji: '\uD83C\uDF57', label: 'Lean protein', detail: '7-9 lb total chicken, turkey, white fish, tuna, or shrimp for the week' },
-      { emoji: '\uD83E\uDD6C', label: 'Vegetables', detail: '21-28 cups broccoli, green beans, spinach, zucchini, cauliflower, salad mix' },
-      { emoji: '\uD83E\uDED8', label: 'Smart carbs', detail: '4-6 sweet potatoes and 5-7 cups beans or lentils cooked' },
-      { emoji: '\uD83C\uDF4E', label: 'Fruit', detail: '7-10 apples, oranges, or berry portions' },
-      { emoji: '\uD83D\uDCA7', label: 'Water', detail: `About ${weeklyBottles} bottles of 16.9 oz water for the week` },
-      { emoji: '\uD83E\uDD63', label: 'Breakfast add-ons', detail: 'Optional fat-free Greek yogurt or egg whites if hunger gets loud' },
+      { section: 'Protein', items: [
+        { name: 'Boneless skinless chicken breast', qty: '3 lb', note: 'For ~5 meals. Grill or bake in bulk.' },
+        { name: 'Ground turkey (99% lean)', qty: '2 lb', note: 'For ~4 meals.' },
+        { name: 'Frozen cod or tilapia fillets', qty: '1.5 lb', note: 'For ~3 meals.' },
+        { name: 'Canned tuna in water (low sodium)', qty: '4 cans (5 oz each)', note: 'For ~2 meals or backup protein.' },
+        { name: 'Raw shrimp (peeled, deveined)', qty: '1 lb', note: 'Optional swap for any protein meal.' },
+      ]},
+      { section: 'Vegetables', items: [
+        { name: 'Broccoli crowns', qty: '3 heads (~2 lb)', note: '~8 cups florets.' },
+        { name: 'Green beans (fresh or frozen)', qty: '2 lb bag', note: '~7 cups.' },
+        { name: 'Baby spinach', qty: '2 containers (5 oz each)', note: 'For salads + cooking.' },
+        { name: 'Zucchini', qty: '4 medium', note: '~6 cups sliced.' },
+        { name: 'Cauliflower', qty: '1 large head', note: '~4 cups florets.' },
+        { name: 'Mixed salad greens', qty: '2 containers (5 oz each)', note: 'For dinner salad bowls.' },
+        { name: 'Cucumber', qty: '2 medium', note: 'For salads.' },
+        { name: 'Cherry tomatoes', qty: '1 pint', note: 'For salads.' },
+      ]},
+      { section: 'Carbs + Legumes', items: [
+        { name: 'Sweet potatoes', qty: '5 medium', note: '1 per day for 5 days — bake in batch.' },
+        { name: 'Black beans (canned, no salt added)', qty: '4 cans (15 oz each)', note: '~6 cups drained. Covers remaining 2 days + backup.' },
+        { name: 'Dry lentils (green or brown)', qty: '1 lb bag', note: 'Cooks to ~5 cups. Alternate with beans.' },
+      ]},
+      { section: 'Fruit', items: [
+        { name: 'Apples (Fuji or Gala)', qty: '4', note: '1 per day for 4 days.' },
+        { name: 'Oranges', qty: '3', note: '1 per day for 3 days.' },
+        { name: 'Blueberries (fresh or frozen)', qty: '2 pints', note: 'Best berry for your A1c + LDL. Swap for apple/orange days.' },
+      ]},
+      { section: 'Dairy + Extras', items: [
+        { name: 'Fat-free Greek yogurt (plain)', qty: '2 large tubs (32 oz each)', note: 'Optional if hunger gets loud at dinner.' },
+        { name: 'Ground cinnamon', qty: '1 jar', note: 'For yogurt. Skip if you have some.' },
+      ]},
+      { section: 'Hydration', items: [
+        { name: 'Water (16.9 oz bottles)', qty: `${weeklyBottles} bottles`, note: `${wOz} oz/day × 7 days = ${weeklyOz} oz total.` },
+        { name: 'Sparkling water (unsweetened)', qty: '1 case (12 pack)', note: 'Optional variety. Zero calories, zero sodium.' },
+        { name: 'Unsweet tea bags', qty: '1 box', note: 'Optional for evening drink lane.' },
+      ]},
+      { section: 'Seasoning (no salt)', items: [
+        { name: 'Garlic powder', qty: '1 jar', note: 'Skip if stocked.' },
+        { name: 'Onion powder', qty: '1 jar', note: 'Skip if stocked.' },
+        { name: 'Black pepper', qty: '1 grinder', note: 'Skip if stocked.' },
+        { name: 'Lemon juice (bottled)', qty: '1 bottle', note: 'For fish + salad.' },
+        { name: 'Mrs. Dash (salt-free)', qty: '1 bottle', note: 'All-purpose seasoning.' },
+      ]},
     ];
   }
+
+  // 4 meals/day: Meal 1 (8:30) + Meal 2 (12:30) + Meal 3 (4:00) + Meal 4 (7:30) × 7 days = 28 eating events
   return [
-    { emoji: '\uD83E\uDD5A', label: 'Breakfast + snack protein', detail: 'Egg whites or fat-free Greek yogurt for 7 breakfasts plus 7 bridge snacks' },
-    { emoji: '\uD83C\uDF57', label: 'Lunch + dinner protein', detail: '6-8 lb total chicken, turkey, fish, tuna, or shrimp for the week' },
-    { emoji: '\uD83E\uDD6C', label: 'Vegetables', detail: '18-24 cups total vegetables plus salad bowls' },
-    { emoji: '\uD83E\uDED8', label: 'Beans / lentils', detail: '4-6 cups cooked total' },
-    { emoji: '\uD83C\uDF60', label: 'Sweet potatoes + fruit', detail: '4-5 sweet potatoes and 7-10 fruit servings' },
-    { emoji: '\uD83D\uDCA7', label: 'Water', detail: `About ${weeklyBottles} bottles of 16.9 oz water for the week` },
+    { section: 'Protein', items: [
+      { name: 'Boneless skinless chicken breast', qty: '3 lb', note: 'For ~5 lunch/dinner meals.' },
+      { name: 'Ground turkey (99% lean)', qty: '2 lb', note: 'For ~4 lunch/dinner meals.' },
+      { name: 'Frozen cod or tilapia fillets', qty: '1 lb', note: 'For ~2 dinner meals.' },
+      { name: 'Canned tuna in water (low sodium)', qty: '7 cans (5 oz each)', note: '7 bridge snack options (Meal 3).' },
+      { name: 'Raw shrimp (peeled, deveined)', qty: '1 lb', note: 'Optional swap for any protein meal.' },
+    ]},
+    { section: 'Breakfast + Snack Protein', items: [
+      { name: 'Liquid egg whites (carton)', qty: '2 cartons (32 oz each)', note: '7 breakfasts × 1 cup each.' },
+      { name: 'Fat-free Greek yogurt (plain)', qty: '3 large tubs (32 oz each)', note: '7 breakfasts (6 oz each) + 7 bridge snacks (1 cup each).' },
+      { name: 'Edamame (frozen, shelled)', qty: '1 bag (16 oz)', note: 'Alternate bridge snack option.' },
+    ]},
+    { section: 'Vegetables', items: [
+      { name: 'Broccoli crowns', qty: '2 heads (~1.5 lb)', note: '~6 cups florets.' },
+      { name: 'Green beans (fresh or frozen)', qty: '2 lb bag', note: '~7 cups.' },
+      { name: 'Baby spinach', qty: '2 containers (5 oz each)', note: 'For cooking + salads.' },
+      { name: 'Zucchini', qty: '3 medium', note: '~4 cups sliced.' },
+      { name: 'Mixed salad greens', qty: '2 containers (5 oz each)', note: 'For dinner salads.' },
+      { name: 'Cucumber', qty: '2 medium', note: 'For snacks + salads.' },
+      { name: 'Carrot sticks (baby carrots)', qty: '1 bag (1 lb)', note: 'For Meal 3 bridge snack.' },
+      { name: 'Cherry tomatoes', qty: '1 pint', note: 'For salads.' },
+    ]},
+    { section: 'Carbs + Legumes', items: [
+      { name: 'Sweet potatoes', qty: '4 medium', note: 'For dinners when needed.' },
+      { name: 'Black beans (canned, no salt added)', qty: '4 cans (15 oz each)', note: '~6 cups drained for lunches.' },
+      { name: 'Dry lentils (green or brown)', qty: '1 lb bag', note: 'Alternate with beans for lunch.' },
+    ]},
+    { section: 'Fruit', items: [
+      { name: 'Blueberries (fresh or frozen)', qty: '3 pints', note: '7 breakfasts × 1 cup each. Best berry for your A1c + LDL.' },
+      { name: 'Apples', qty: '4', note: 'For Meal 3 bridge snack days.' },
+      { name: 'Oranges', qty: '3', note: 'Alternate bridge snack fruit.' },
+    ]},
+    { section: 'Hydration', items: [
+      { name: 'Water (16.9 oz bottles)', qty: `${weeklyBottles} bottles`, note: `${wOz} oz/day × 7 days = ${weeklyOz} oz total.` },
+      { name: 'Sparkling water (unsweetened)', qty: '1 case (12 pack)', note: 'Optional variety. Zero calories, zero sodium.' },
+      { name: 'Unsweet tea bags', qty: '1 box', note: 'For afternoon + evening drink lanes.' },
+    ]},
+    { section: 'Extras', items: [
+      { name: 'Psyllium husk powder', qty: '1 container', note: 'Only if doctor-approved. 1 serving/day in water.' },
+      { name: 'Ground cinnamon', qty: '1 jar', note: 'For yogurt. Skip if stocked.' },
+    ]},
+    { section: 'Seasoning (no salt)', items: [
+      { name: 'Garlic powder', qty: '1 jar', note: 'Skip if stocked.' },
+      { name: 'Onion powder', qty: '1 jar', note: 'Skip if stocked.' },
+      { name: 'Black pepper', qty: '1 grinder', note: 'Skip if stocked.' },
+      { name: 'Lemon juice (bottled)', qty: '1 bottle', note: 'For fish + salad.' },
+      { name: 'Mrs. Dash (salt-free)', qty: '1 bottle', note: 'All-purpose seasoning.' },
+    ]},
   ];
 }
+
+// Keep old simple list for backward compat (used by existing GroceryItem refs)
+export function groceryList(mealMode: MealMode, startWeight: number, hydrationFactor: number): GroceryItem[] {
+  const sections = weeklyGroceryList(mealMode, startWeight, hydrationFactor);
+  return sections.map((s) => ({
+    emoji: '',
+    label: s.section,
+    detail: s.items.map((i) => `${i.qty} ${i.name}`).join(', '),
+  }));
+}
+
+// ---------------------------------------------------------------------------
+// Snack cheat section — categorized healthy night snacks + danger rating
+// ---------------------------------------------------------------------------
+
+export type DangerLevel = 1 | 2 | 3 | 4 | 5;
+
+export interface CheatSnack {
+  name: string;
+  portion: string;
+  calories: string;
+  danger: DangerLevel;  // 1 = safe indulgence, 5 = proceed with extreme caution
+  why: string;
+}
+
+export interface SnackCategory {
+  category: string;
+  emoji: string;
+  snacks: CheatSnack[];
+}
+
+export const CHEAT_CODE = 'slowroll';
+
+export const SNACK_CATEGORIES: SnackCategory[] = [
+  {
+    category: 'Frozen treats',
+    emoji: '\uD83C\uDF66',
+    snacks: [
+      { name: 'Frozen blueberries', portion: '1 cup', calories: '~85', danger: 1, why: 'Basically a popsicle. Your A1c will not even flinch.' },
+      { name: 'Frozen banana slices', portion: '1/2 banana', calories: '~55', danger: 1, why: 'Natural ice cream texture when frozen.' },
+      { name: 'Greek yogurt bark', portion: '2 oz piece', calories: '~70', danger: 2, why: 'Spread fat-free Greek yogurt + blueberries on a sheet pan, freeze, snap into pieces.' },
+      { name: 'Frozen grapes', portion: '1 cup', calories: '~100', danger: 2, why: 'Little sugar bombs but the cold slows you down.' },
+      { name: 'Outshine no-sugar-added fruit bars', portion: '1 bar', calories: '~25-40', danger: 1, why: 'Check the label. Some are basically fruit + water.' },
+      { name: 'Halo Top (protein series)', portion: '1/2 cup', calories: '~90', danger: 3, why: 'Tastes like real ice cream. Danger is eating the whole pint.' },
+      { name: 'Sugar-free popsicles', portion: '1 pop', calories: '~15', danger: 1, why: 'Basically flavored ice. Zero guilt.' },
+    ],
+  },
+  {
+    category: 'Crunchy + salty',
+    emoji: '\uD83E\uDD5C',
+    snacks: [
+      { name: 'Cucumber slices + everything bagel seasoning', portion: '1 whole cucumber', calories: '~30', danger: 1, why: 'Crunchy, salty, basically water.' },
+      { name: 'Air-popped popcorn (no butter)', portion: '3 cups', calories: '~90', danger: 2, why: 'Fiber bomb. Just don\'t drench it.' },
+      { name: 'Rice cakes (plain)', portion: '2 cakes', calories: '~70', danger: 2, why: 'Crispy. Top with cinnamon if you want.' },
+      { name: 'Roasted edamame', portion: '1/3 cup', calories: '~100', danger: 2, why: 'Crunchy protein. Buy the dry-roasted packs.' },
+      { name: 'Seaweed snacks', portion: '1 pack', calories: '~25', danger: 1, why: 'Salt craving solved for basically no calories.' },
+      { name: 'Carrot + celery sticks', portion: 'Unlimited', calories: '~40', danger: 1, why: 'Eat the whole bag. Nobody got fat from carrots.' },
+      { name: 'Pickles (dill, whole)', portion: '2 spears', calories: '~10', danger: 1, why: 'Watch sodium if you are salt-sensitive. Otherwise crunch away.' },
+      { name: 'Jicama sticks + Tajin', portion: '1 cup', calories: '~45', danger: 1, why: 'Crispy, tangy, almost zero calorie density.' },
+    ],
+  },
+  {
+    category: 'Sweet + creamy',
+    emoji: '\uD83C\uDF53',
+    snacks: [
+      { name: 'Fat-free Greek yogurt + cinnamon', portion: '1 cup', calories: '~100', danger: 1, why: 'Protein dessert. Your baseline meal already includes this.' },
+      { name: 'Cottage cheese + blueberries', portion: '1/2 cup + 1/4 cup berries', calories: '~110', danger: 2, why: 'High protein. Go fat-free or 1%.' },
+      { name: 'Apple slices + PB2 powder', portion: '1 apple + 2 tbsp PB2', calories: '~140', danger: 2, why: 'Powdered PB has 85% less fat than regular. Tastes close enough.' },
+      { name: 'Chia pudding', portion: '1/2 cup', calories: '~120', danger: 2, why: 'Make ahead: chia seeds + almond milk + cinnamon overnight.' },
+      { name: 'Frozen yogurt bites', portion: '10 bites', calories: '~80', danger: 2, why: 'Drop yogurt in silicone molds, freeze. Mini treats.' },
+      { name: 'Sugar-free Jello', portion: '1 cup', calories: '~10', danger: 1, why: 'Tastes like dessert, basically doesn\'t exist calorically.' },
+      { name: 'Baked apple with cinnamon', portion: '1 apple', calories: '~95', danger: 1, why: 'Microwave 3 min with cinnamon. Tastes like pie filling.' },
+    ],
+  },
+  {
+    category: 'Chocolate zone',
+    emoji: '\uD83C\uDF6B',
+    snacks: [
+      { name: 'Dark chocolate (85%+ cacao)', portion: '1 square (10g)', calories: '~55', danger: 2, why: 'One square. Not one row. Antioxidants are real.' },
+      { name: 'Cocoa powder in Greek yogurt', portion: '1 tbsp cocoa + 1 cup yogurt', calories: '~115', danger: 2, why: 'Chocolate mousse vibes. Zero added sugar.' },
+      { name: 'Frozen chocolate banana', portion: '1/2 banana dipped', calories: '~90', danger: 3, why: 'Dip in melted dark chocolate, freeze. Portion control is everything.' },
+      { name: 'Chocolate rice cake', portion: '1 cake', calories: '~60', danger: 2, why: 'Some brands have a thin chocolate coating. Check sugar.' },
+      { name: 'Cacao nibs', portion: '1 tbsp', calories: '~35', danger: 1, why: 'Crunchy, bitter, pure cacao. Sprinkle on yogurt.' },
+    ],
+  },
+  {
+    category: 'Savory + warm',
+    emoji: '\uD83C\uDF72',
+    snacks: [
+      { name: 'Bone broth (low sodium)', portion: '1 mug', calories: '~35', danger: 1, why: 'Warm, savory, filling. Basically a hug for your stomach.' },
+      { name: 'Egg white omelette', portion: '3 egg whites + vegetables', calories: '~70', danger: 1, why: 'Pure protein. Add spinach and mushroom.' },
+      { name: 'Turkey roll-ups', portion: '3 slices + mustard', calories: '~75', danger: 2, why: 'Low-sodium deli turkey. Roll around a pickle spear.' },
+      { name: 'Miso soup', portion: '1 cup', calories: '~35', danger: 2, why: 'Watch sodium content. But satisfying and warm.' },
+      { name: 'Baked zucchini chips', portion: '1 cup sliced', calories: '~20', danger: 1, why: 'Slice thin, bake at 425 until crispy. Season with garlic powder.' },
+      { name: 'Steamed edamame with salt-free seasoning', portion: '1 cup in pods', calories: '~120', danger: 2, why: 'High protein, fun to eat slowly.' },
+      { name: 'Roasted chickpeas', portion: '1/4 cup', calories: '~60', danger: 2, why: 'Crunchy. Season however you want (no salt).' },
+    ],
+  },
+  {
+    category: 'Drinks + sips',
+    emoji: '\uD83C\uDF75',
+    snacks: [
+      { name: 'Herbal tea (chamomile, peppermint)', portion: '1 mug', calories: '~0', danger: 1, why: 'Zero everything. Calms you down.' },
+      { name: 'Sparkling water + lemon', portion: '12 oz', calories: '~0', danger: 1, why: 'The bubbles trick your brain into thinking it\'s soda.' },
+      { name: 'Golden milk (turmeric + almond milk)', portion: '1 mug', calories: '~30', danger: 1, why: 'Anti-inflammatory. Warm and slightly sweet.' },
+      { name: 'Decaf coffee (black)', portion: '1 cup', calories: '~5', danger: 1, why: 'If you need the ritual without the caffeine.' },
+      { name: 'Tart cherry juice (unsweetened)', portion: '4 oz', calories: '~50', danger: 2, why: 'Small glass only. Helps sleep. Watch the sugar in larger amounts.' },
+    ],
+  },
+];
 
 // ---------------------------------------------------------------------------
 // Plan for a given day
