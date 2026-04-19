@@ -18,6 +18,7 @@ import {
   StyleSheet,
   Pressable,
   TextInput,
+  Linking,
   SafeAreaView,
 } from 'react-native';
 import { Image } from 'expo-image';
@@ -108,15 +109,22 @@ export default function NutritionScreen() {
             <View key={sIdx} style={styles.grocerySection}>
               <Text style={styles.grocerySectionTitle}>{section.section}</Text>
               {section.items.map((item, iIdx) => (
-                <View key={iIdx} style={styles.groceryRow}>
+                <Pressable
+                  key={iIdx}
+                  style={({ pressed }) => [styles.groceryRow, pressed && styles.groceryRowPressed]}
+                  onPress={() => Linking.openURL(
+                    'https://www.instacart.com/store/s?k=' + encodeURIComponent(item.name)
+                  )}
+                >
                   <View style={styles.groceryQtyBox}>
                     <Text style={styles.groceryQty}>{item.qty}</Text>
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.groceryName}>{item.name}</Text>
                     <Text style={styles.groceryNote}>{item.note}</Text>
+                    <Text style={styles.instacartLink}>Tap to find on Instacart ›</Text>
                   </View>
-                </View>
+                </Pressable>
               ))}
             </View>
           ))}
@@ -346,7 +354,11 @@ const styles = StyleSheet.create({
   },
   groceryRow: {
     flexDirection: 'row', gap: 10, alignItems: 'flex-start',
-    paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: Palette.line,
+    paddingVertical: 10, paddingHorizontal: 8, borderRadius: 12,
+    borderBottomWidth: 1, borderBottomColor: Palette.line,
+  },
+  groceryRowPressed: {
+    backgroundColor: 'rgba(67,176,42,0.08)',
   },
   groceryQtyBox: {
     minWidth: 100, paddingVertical: 4, paddingHorizontal: 8,
@@ -355,6 +367,7 @@ const styles = StyleSheet.create({
   groceryQty: { fontSize: 13, fontWeight: '800', color: '#254bb7' },
   groceryName: { fontSize: 14, fontWeight: '700', color: Palette.ink },
   groceryNote: { fontSize: 12, color: Palette.muted, lineHeight: 17, marginTop: 2 },
+  instacartLink: { fontSize: 11, fontWeight: '800', color: '#43b02a', marginTop: 4, letterSpacing: 0.3 },
 
   // Snack cheat — locked
   cheatCardLocked: {
