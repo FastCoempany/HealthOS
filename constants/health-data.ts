@@ -296,7 +296,8 @@ const IMG = {
   blueberries: 'https://images.unsplash.com/photo-1498557850523-fd3d118b962e?w=800&q=80',
   eggWhites:   'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=800&q=80',
   yogurt:      'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&q=80',
-  tuna:        'https://images.unsplash.com/photo-1600803907087-f56d462fd26b?w=800&q=80',
+  sardines:    'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=800&q=80',
+  salmon:      'https://images.unsplash.com/photo-1574781330855-d0db8cc6a79c?w=800&q=80',
   salad:       'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80',
   fish:        'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=800&q=80',
   edamame:     'https://images.unsplash.com/photo-1564834744159-ff0ea41ba4b9?w=800&q=80',
@@ -308,7 +309,7 @@ function meals2(): Meal[] {
     {
       key: 'meal1', label: 'Meal 1', time: '12:00 PM', title: 'Protein plate + produce',
       items: [
-        { name: 'Lean protein', portion: '8 oz', description: 'Grilled chicken breast, turkey breast, white fish, or tuna in water',
+        { name: 'Lean protein', portion: '8 oz', description: 'Grilled chicken breast, turkey breast, wild salmon, or sardines',
           imageUrl: IMG.chicken, portionHint: 'About the size of your palm + fingers' },
         { name: 'Vegetables', portion: '2 cups', description: 'Broccoli, green beans, spinach, zucchini, cauliflower, or mixed vegetables',
           imageUrl: IMG.vegetables, portionHint: 'Roughly two clenched fists' },
@@ -322,7 +323,7 @@ function meals2(): Meal[] {
     {
       key: 'meal2', label: 'Meal 2', time: '6:30 PM', title: 'Protein plate + salad',
       items: [
-        { name: 'Lean protein (again)', portion: '8 oz', description: 'Chicken, turkey, shrimp, cod, tuna, or 99% lean ground turkey',
+        { name: 'Lean protein (again)', portion: '8 oz', description: 'Chicken, turkey, shrimp, wild salmon, or 99% lean ground turkey',
           imageUrl: IMG.chicken, portionHint: 'About the size of your palm + fingers' },
         { name: 'Salad or vegetables', portion: '2 cups cooked or huge salad bowl', description: 'Large bowl of salad greens, or 2 cups cooked vegetables',
           imageUrl: IMG.salad, portionHint: 'Fill the plate. Twice.' },
@@ -353,7 +354,7 @@ function meals4(): Meal[] {
     {
       key: 'meal2', label: 'Meal 2', time: '12:30 PM', title: 'Lean protein lunch',
       items: [
-        { name: 'Lean protein', portion: '6-7 oz', description: 'Chicken, turkey, tuna in water, or white fish',
+        { name: 'Lean protein', portion: '6-7 oz', description: 'Chicken, turkey, wild salmon, or sardines',
           imageUrl: IMG.chicken, portionHint: 'Size of your palm' },
         { name: 'Vegetables', portion: '2 cups', description: '2 cups vegetables of your choice',
           imageUrl: IMG.vegetables, portionHint: 'Roughly two clenched fists' },
@@ -365,8 +366,8 @@ function meals4(): Meal[] {
     {
       key: 'meal3', label: 'Meal 3', time: '4:00 PM', title: 'Bridge snack',
       items: [
-        { name: 'Protein (pick one)', portion: '1 serving', description: '1 can low-sodium tuna OR 1 cup fat-free Greek yogurt OR 1 cup edamame',
-          imageUrl: IMG.tuna, portionHint: 'One can, cup, or pod handful' },
+        { name: 'Protein (pick one)', portion: '1 serving', description: '1 can sardines in water OR 1 cup fat-free Greek yogurt OR 1 cup edamame',
+          imageUrl: IMG.sardines, portionHint: 'One can, cup, or pod handful' },
         { name: 'Fruit or veg', portion: '1 serving', description: '1 piece fruit or cucumber/carrot sticks',
           imageUrl: IMG.fruit, portionHint: 'Whole fruit or a handful of sticks' },
       ],
@@ -375,8 +376,8 @@ function meals4(): Meal[] {
     {
       key: 'meal4', label: 'Meal 4', time: '7:30 PM', title: 'Lean dinner',
       items: [
-        { name: 'Lean protein', portion: '6-8 oz', description: '6-8 oz lean protein',
-          imageUrl: IMG.fish, portionHint: 'Size of your palm + fingers' },
+        { name: 'Lean protein', portion: '6-8 oz', description: '6-8 oz wild salmon, chicken, turkey, or sardines',
+          imageUrl: IMG.salmon, portionHint: 'Size of your palm + fingers' },
         { name: 'Vegetables or salad', portion: '2 cups', description: '2 cups vegetables or salad',
           imageUrl: IMG.salad, portionHint: 'Pile it high' },
         { name: 'Sweet potato or beans (optional)', portion: '1 small or 1/2 cup', description: '1 small sweet potato or 1/2 cup beans if still hungry',
@@ -417,8 +418,8 @@ export function weeklyGroceryList(mealMode: MealMode, startWeight: number, hydra
       { section: 'Protein', items: [
         { name: 'Boneless skinless chicken breast', qty: '3 lb', note: 'For ~5 meals. Grill or bake in bulk.' },
         { name: 'Ground turkey (99% lean)', qty: '2 lb', note: 'For ~4 meals.' },
-        { name: 'Frozen cod or tilapia fillets', qty: '1.5 lb', note: 'For ~3 meals.' },
-        { name: 'Canned tuna in water (low sodium)', qty: '4 cans (5 oz each)', note: 'For ~2 meals or backup protein.' },
+        { name: 'Wild salmon fillets (fresh or frozen)', qty: '1.5 lb', note: 'For ~3 meals. Omega-3s directly lower LDL oxidation and improve insulin sensitivity.' },
+        { name: 'Canned sardines in water', qty: '4 cans (4 oz each)', note: 'Higher omega-3 than tuna, zero mercury risk, high calcium. For ~2 meals or backup.' },
         { name: 'Raw shrimp (peeled, deveined)', qty: '1 lb', note: 'Optional swap for any protein meal.' },
       ]},
       { section: 'Vegetables', items: [
@@ -465,8 +466,8 @@ export function weeklyGroceryList(mealMode: MealMode, startWeight: number, hydra
     { section: 'Protein', items: [
       { name: 'Boneless skinless chicken breast', qty: '3 lb', note: 'For ~5 lunch/dinner meals.' },
       { name: 'Ground turkey (99% lean)', qty: '2 lb', note: 'For ~4 lunch/dinner meals.' },
-      { name: 'Frozen cod or tilapia fillets', qty: '1 lb', note: 'For ~2 dinner meals.' },
-      { name: 'Canned tuna in water (low sodium)', qty: '7 cans (5 oz each)', note: '7 bridge snack options (Meal 3).' },
+      { name: 'Wild salmon fillets (fresh or frozen)', qty: '1 lb', note: 'For ~2 dinner meals. Best omega-3 source for your LDL and ALT.' },
+      { name: 'Canned sardines in water', qty: '7 cans (4 oz each)', note: '7 bridge snack options (Meal 3). No mercury buildup over 60 days.' },
       { name: 'Raw shrimp (peeled, deveined)', qty: '1 lb', note: 'Optional swap for any protein meal.' },
     ]},
     { section: 'Breakfast + Snack Protein', items: [
