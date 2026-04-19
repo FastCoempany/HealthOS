@@ -10,7 +10,14 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.fastcoempany.HealthOS"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/eb2c8c82-4514-4b8a-911e-40686b225d67"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     },
     "android": {
       "adaptiveIcon": {
