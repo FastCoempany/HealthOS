@@ -22,6 +22,7 @@ const MAPPING = {
   'figure.walk': 'directions-walk',
   'stethoscope': 'monitor-heart',
   'checklist': 'checklist',
+  'fork.knife': 'soup-kitchen',
 } as IconMapping;
 
 /**
