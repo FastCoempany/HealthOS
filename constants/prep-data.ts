@@ -362,8 +362,8 @@ export const PREP_TIMELINE: PrepStep[] = [
     detail: 'Lentils should be tender but not mushy. Drain any excess water. Season and transfer to a glass container.' },
   { time: '1:25', icon: '*', title: 'Wipe skillet, wait on salmon',
     detail: 'DO NOT cook the salmon today. Salmon goes in on Wednesday — it only lasts 3 days cooked. Put your salmon fillets in the freezer if you won\'t cook them Wednesday.' },
-  { time: '1:30', icon: 'O', title: 'Portion into containers',
-    detail: 'Assemble Mon-Wed lunches/dinners. Chicken + broccoli + lentils + sweet potato. Label with tape and a Sharpie: "Mon Lunch", "Mon Dinner", etc. See the Container Map section for exact pairings.' },
+  { time: '1:30', icon: 'O', title: 'Portion into containers — build all you can now',
+    detail: 'Grab 10 containers, tape, and a Sharpie. Build these right now:\n\nMON LUNCH: 6-7 oz chicken + 1 cup broccoli + 1 cup green beans + 3/4 cup lentils\nMON DINNER: 6-8 oz chicken + 1 cup asparagus + 1 sweet potato (cabbage shred later)\nTUE LUNCH: 6-7 oz chicken + 1 cup broccoli + 1 cup green beans + 3/4 cup lentils\nTUE DINNER: 6-8 oz chicken + 1 cup asparagus + 1 sweet potato\nWED LUNCH: last chicken (~6 oz) + remaining broccoli + green beans + 3/4 cup lentils\n\nSet aside in a separate container:\n- Remaining lentils for Thu-Fri lunches\n- Remaining sweet potatoes for Wed-Thu dinners\n\nDO NOT container these (prep fresh later):\n- Salmon (cook Wed + Thu + Fri nights)\n- Asparagus for Wed-Sun (roast fresh in small batches)\n- Purple cabbage (shred fresh each dinner)\n- Breakfast egg whites (cook each morning)\n\nStack containers in fridge: Mon in front, Wed in back. Snack cans + fruit go in a separate shelf zone.' },
   { time: '1:45', icon: '~', title: 'Final cleanup',
     detail: 'Wash pans while they\'re still warm (easier). Wipe the counters. Stack containers in the fridge. Refill water bottles for tomorrow. Prep day done.' },
 ];
@@ -373,15 +373,47 @@ export const PREP_TIMELINE: PrepStep[] = [
 // ---------------------------------------------------------------------------
 
 export const CONTAINER_MAP_4MEAL: ContainerMap[] = [
-  { day: 'Mon', meal: 'Lunch (Meal 2)', label: 'MON LUNCH', contents: ['6-7 oz sliced chicken breast', '1 cup steamed broccoli', '1 cup green beans', '3/4 cup cooked lentils'] },
-  { day: 'Mon', meal: 'Snack (Meal 3)', label: 'MON SNACK', contents: ['1 can sardines (keep sealed)', '1 apple', 'Small bag of carrot sticks'] },
-  { day: 'Mon', meal: 'Dinner (Meal 4)', label: 'MON DINNER', contents: ['Chicken breast 6-8 oz', '1 cup asparagus', '1 cup purple cabbage (shred fresh)', '1 small sweet potato'] },
-  { day: 'Tue', meal: 'Lunch', label: 'TUE LUNCH', contents: ['6-7 oz sliced chicken breast', '1 cup broccoli', '1 cup green beans', '3/4 cup lentils'] },
-  { day: 'Tue', meal: 'Snack', label: 'TUE SNACK', contents: ['1 can sardines', '1 apple'] },
-  { day: 'Tue', meal: 'Dinner', label: 'TUE DINNER', contents: ['Chicken breast 6-8 oz', '1 cup asparagus', '1 cup purple cabbage', '1 small sweet potato'] },
-  { day: 'Wed', meal: 'Lunch', label: 'WED LUNCH', contents: ['Last of chicken (~6 oz)', '1 cup broccoli', '1 cup green beans', '3/4 cup lentils'] },
-  { day: 'Wed', meal: 'Dinner — FRESH COOK', label: 'WED COOK SALMON', contents: ['Cook first salmon fillet tonight', 'Roast fresh asparagus', 'Shred purple cabbage fresh', 'Sweet potato from Sunday batch'] },
-  { day: 'Thu-Sat', meal: 'Mix fresh salmon + remaining prep', label: 'SEE MIDWEEK CHECK', contents: ['Cook salmon fresh each day or every other day', 'Roast fresh asparagus in small batches', 'Shred cabbage as needed', 'Reheat remaining carbs from Sunday batch'] },
+  // --- MONDAY ---
+  { day: 'Mon', meal: 'Breakfast (Meal 1)', label: 'MON BREAKFAST', contents: ['Cook fresh: 1 cup egg whites scrambled', '1 cup blueberries', 'Psyllium in water (if approved)'] },
+  { day: 'Mon', meal: 'Lunch (Meal 2)', label: 'MON LUNCH', contents: ['Container: 6-7 oz sliced chicken breast', 'Container: 1 cup steamed broccoli', 'Container: 1 cup green beans', 'Container: 3/4 cup cooked lentils'] },
+  { day: 'Mon', meal: 'Snack (Meal 3)', label: 'MON SNACK', contents: ['Bag/container: 1 can sardines (keep sealed until eating)', '1 apple (whole, in a separate bag)'] },
+  { day: 'Mon', meal: 'Dinner (Meal 4)', label: 'MON DINNER', contents: ['Container: 6-8 oz sliced chicken breast', 'Container: 1 cup roasted asparagus', 'Shred fresh: 1 cup purple cabbage slaw with lemon + pepper', '1 baked sweet potato (from Sunday batch)'] },
+
+  // --- TUESDAY ---
+  { day: 'Tue', meal: 'Breakfast (Meal 1)', label: 'TUE BREAKFAST', contents: ['Cook fresh: 1 cup egg whites scrambled', '1 cup blueberries', 'Psyllium in water (if approved)'] },
+  { day: 'Tue', meal: 'Lunch (Meal 2)', label: 'TUE LUNCH', contents: ['Container: 6-7 oz sliced chicken breast', 'Container: 1 cup steamed broccoli', 'Container: 1 cup green beans', 'Container: 3/4 cup cooked lentils'] },
+  { day: 'Tue', meal: 'Snack (Meal 3)', label: 'TUE SNACK', contents: ['1 can sardines (sealed)', '1 apple'] },
+  { day: 'Tue', meal: 'Dinner (Meal 4)', label: 'TUE DINNER', contents: ['Container: 6-8 oz sliced chicken breast', 'Container: 1 cup roasted asparagus', 'Shred fresh: 1 cup purple cabbage slaw', '1 baked sweet potato (from Sunday batch)'] },
+
+  // --- WEDNESDAY (midweek fresh cook) ---
+  { day: 'Wed', meal: 'Breakfast (Meal 1)', label: 'WED BREAKFAST', contents: ['Cook fresh: 1 cup egg whites scrambled', '1 cup blueberries', 'Psyllium in water (if approved)'] },
+  { day: 'Wed', meal: 'Lunch (Meal 2)', label: 'WED LUNCH', contents: ['Container: last of Sunday chicken (~6 oz)', 'Container: remaining broccoli', 'Container: remaining green beans', 'Container: 3/4 cup lentils'] },
+  { day: 'Wed', meal: 'Snack (Meal 3)', label: 'WED SNACK', contents: ['1 can sardines (sealed)', '1 orange'] },
+  { day: 'Wed', meal: 'Dinner (Meal 4) — COOK FRESH', label: 'WED DINNER (FRESH)', contents: ['Cook fresh tonight: 6-8 oz wild salmon fillet (400°F, 12-15 min, lemon + garlic + Mrs. Dash)', 'Roast fresh: 1 cup asparagus (425°F, 10 min)', 'Shred fresh: 1 cup purple cabbage slaw', '1 baked sweet potato (from Sunday batch)'] },
+
+  // --- THURSDAY ---
+  { day: 'Thu', meal: 'Breakfast (Meal 1)', label: 'THU BREAKFAST', contents: ['Cook fresh: 1 cup egg whites scrambled', '1 cup blueberries', 'Psyllium in water (if approved)'] },
+  { day: 'Thu', meal: 'Lunch (Meal 2)', label: 'THU LUNCH', contents: ['Container: leftover salmon from Wed (~6 oz)', 'Container: leftover asparagus from Wed roast', 'Shred fresh: 1 cup purple cabbage', 'Container: 3/4 cup lentils (from Sunday batch, still good through Fri)'] },
+  { day: 'Thu', meal: 'Snack (Meal 3)', label: 'THU SNACK', contents: ['1 can sardines (sealed)', '1 orange'] },
+  { day: 'Thu', meal: 'Dinner (Meal 4) — COOK FRESH', label: 'THU DINNER (FRESH)', contents: ['Cook fresh: 6-8 oz wild salmon fillet', 'Roast fresh: 1 cup asparagus', 'Shred fresh: 1 cup purple cabbage slaw', '1 baked sweet potato (bake 2 more if Sunday batch is gone)'] },
+
+  // --- FRIDAY ---
+  { day: 'Fri', meal: 'Breakfast (Meal 1)', label: 'FRI BREAKFAST', contents: ['Cook fresh: 1 cup egg whites scrambled', '1 cup blueberries', 'Psyllium in water (if approved)'] },
+  { day: 'Fri', meal: 'Lunch (Meal 2)', label: 'FRI LUNCH', contents: ['Container: leftover salmon from Thu (~6 oz)', 'Container: leftover asparagus from Thu', 'Shred fresh: 1 cup purple cabbage', 'Container: last of lentils (5 days post-cook — smell check first)'] },
+  { day: 'Fri', meal: 'Snack (Meal 3)', label: 'FRI SNACK', contents: ['1 can sardines (sealed)', '1 apple'] },
+  { day: 'Fri', meal: 'Dinner (Meal 4) — COOK FRESH', label: 'FRI DINNER (FRESH)', contents: ['Cook fresh: 6-8 oz wild salmon (last of the week\'s supply)', 'Roast fresh: 1 cup asparagus', 'Shred fresh: 1 cup purple cabbage slaw', '1 baked sweet potato'] },
+
+  // --- SATURDAY ---
+  { day: 'Sat', meal: 'Breakfast (Meal 1)', label: 'SAT BREAKFAST', contents: ['Cook fresh: 1 cup egg whites (or 6 oz Greek yogurt if switching up)', '1 cup blueberries', 'Psyllium in water (if approved)'] },
+  { day: 'Sat', meal: 'Lunch (Meal 2)', label: 'SAT LUNCH', contents: ['Cook fresh: 6-7 oz ground turkey (brown in skillet, 8-10 min)', '1 cup steamed broccoli (fresh batch, steam 4-5 min)', '1 cup green beans (sauté 4-5 min)', '3/4 cup black beans (drain + rinse 1 can, heat 3-4 min)'] },
+  { day: 'Sat', meal: 'Snack (Meal 3)', label: 'SAT SNACK', contents: ['1 can sardines (sealed)', '1 apple or orange'] },
+  { day: 'Sat', meal: 'Dinner (Meal 4)', label: 'SAT DINNER', contents: ['Cook fresh: 6-8 oz ground turkey', 'Roast fresh: 1 cup asparagus', 'Shred fresh: 1 cup purple cabbage slaw', '1 baked sweet potato'] },
+
+  // --- SUNDAY ---
+  { day: 'Sun', meal: 'Breakfast (Meal 1)', label: 'SUN BREAKFAST', contents: ['Cook fresh: 1 cup egg whites scrambled', '1 cup blueberries', 'Psyllium in water (if approved)'] },
+  { day: 'Sun', meal: 'Lunch (Meal 2)', label: 'SUN LUNCH', contents: ['Leftover ground turkey from Sat (~6 oz)', 'Leftover broccoli + green beans from Sat', '3/4 cup black beans (from Sat can)', 'Or cook fresh if Sat leftovers are gone'] },
+  { day: 'Sun', meal: 'Snack (Meal 3)', label: 'SUN SNACK', contents: ['Last can sardines', '1 orange'] },
+  { day: 'Sun', meal: 'Dinner (Meal 4)', label: 'SUN DINNER', contents: ['Cook fresh: shrimp (2-3 min/side until pink) or remaining ground turkey', 'Roast fresh: 1 cup asparagus', 'Shred fresh: 1 cup purple cabbage slaw', '1 baked sweet potato'] },
 ];
 
 // ---------------------------------------------------------------------------
