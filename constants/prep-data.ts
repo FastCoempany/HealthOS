@@ -416,6 +416,36 @@ export const CONTAINER_MAP_4MEAL: ContainerMap[] = [
   { day: 'Sun', meal: 'Dinner (Meal 4)', label: 'SUN DINNER', contents: ['Cook fresh: shrimp (2-3 min/side until pink) or remaining ground turkey', 'Roast fresh: 1 cup asparagus', 'Shred fresh: 1 cup purple cabbage slaw', '1 baked sweet potato'] },
 ];
 
+export const CONTAINER_MAP_2MEAL: ContainerMap[] = [
+  // --- MONDAY ---
+  { day: 'Mon', meal: 'Meal 1 (12:00 PM)', label: 'MON MEAL 1', contents: ['Container: 8 oz sliced chicken breast', 'Container: 1 cup steamed broccoli + 1 cup sautéed spinach', 'Container: 1 cup black beans (drained, rinsed, heated)', '1 apple (whole, in a separate bag)'] },
+  { day: 'Mon', meal: 'Meal 2 (6:30 PM)', label: 'MON MEAL 2', contents: ['Container: 8 oz sliced chicken breast', 'Container: 1 cup roasted asparagus', 'Shred fresh: 1 cup purple cabbage slaw with lemon + pepper', '1 baked sweet potato (from Sunday batch)'] },
+
+  // --- TUESDAY ---
+  { day: 'Tue', meal: 'Meal 1 (12:00 PM)', label: 'TUE MEAL 1', contents: ['Container: 8 oz sliced chicken breast', 'Container: 1 cup steamed broccoli + 1 cup green beans', 'Container: 1 cup black beans', '1 apple'] },
+  { day: 'Tue', meal: 'Meal 2 (6:30 PM)', label: 'TUE MEAL 2', contents: ['Container: 8 oz sliced chicken breast', 'Container: 1 cup roasted asparagus', 'Shred fresh: 1 cup purple cabbage slaw', '1 baked sweet potato (from Sunday batch)', 'Greek yogurt + cinnamon if still hungry'] },
+
+  // --- WEDNESDAY (midweek fresh cook) ---
+  { day: 'Wed', meal: 'Meal 1 (12:00 PM)', label: 'WED MEAL 1', contents: ['Container: last of Sunday chicken (~8 oz)', 'Container: remaining broccoli + spinach', 'Container: 1 cup black beans', '1 orange'] },
+  { day: 'Wed', meal: 'Meal 2 (6:30 PM) — COOK FRESH', label: 'WED MEAL 2 (FRESH)', contents: ['Cook fresh: 8 oz wild salmon fillet (400°F, 12-15 min, lemon + garlic + Mrs. Dash)', 'Roast fresh: 1 cup asparagus (425°F, 10 min)', 'Shred fresh: 1 cup purple cabbage slaw', '1 baked sweet potato (from Sunday batch)'] },
+
+  // --- THURSDAY ---
+  { day: 'Thu', meal: 'Meal 1 (12:00 PM)', label: 'THU MEAL 1', contents: ['Container: leftover salmon from Wed (~8 oz)', 'Container: leftover asparagus from Wed', 'Container: 1 cup lentils (cook fresh small batch: 1/2 cup dry, simmer 20 min)', '1 apple'] },
+  { day: 'Thu', meal: 'Meal 2 (6:30 PM) — COOK FRESH', label: 'THU MEAL 2 (FRESH)', contents: ['Cook fresh: 8 oz wild salmon fillet', 'Roast fresh: 1 cup asparagus', 'Shred fresh: 1 cup purple cabbage slaw', '1 baked sweet potato (bake 2 more if Sunday batch gone)'] },
+
+  // --- FRIDAY ---
+  { day: 'Fri', meal: 'Meal 1 (12:00 PM)', label: 'FRI MEAL 1', contents: ['Container: leftover salmon from Thu (~8 oz)', 'Container: 1 cup steamed broccoli (fresh batch, steam 4-5 min)', 'Container: 1 cup green beans (sauté 4-5 min)', 'Container: remaining lentils from Thu', '1 orange'] },
+  { day: 'Fri', meal: 'Meal 2 (6:30 PM) — COOK FRESH', label: 'FRI MEAL 2 (FRESH)', contents: ['Cook fresh: 8 oz wild salmon (last fillet)', 'Roast fresh: 1 cup asparagus', 'Shred fresh: 1 cup purple cabbage slaw', '1 baked sweet potato', 'Greek yogurt + cinnamon if still hungry'] },
+
+  // --- SATURDAY ---
+  { day: 'Sat', meal: 'Meal 1 (12:00 PM)', label: 'SAT MEAL 1', contents: ['Cook fresh: 8 oz ground turkey (brown 8-10 min)', '1 cup steamed broccoli (fresh)', '1 cup green beans (fresh)', '1 cup black beans (drain + rinse 1 can, heat 3-4 min)', '1 apple'] },
+  { day: 'Sat', meal: 'Meal 2 (6:30 PM)', label: 'SAT MEAL 2', contents: ['Cook fresh: 8 oz ground turkey', 'Roast fresh: 1 cup asparagus', 'Shred fresh: 1 cup purple cabbage slaw', '1 baked sweet potato'] },
+
+  // --- SUNDAY ---
+  { day: 'Sun', meal: 'Meal 1 (12:00 PM)', label: 'SUN MEAL 1', contents: ['Leftover ground turkey from Sat (~8 oz) or cook fresh shrimp (2-3 min/side)', '1 cup steamed broccoli + 1 cup spinach', '1 cup black beans from Sat can', '1 orange or 1 cup blueberries'] },
+  { day: 'Sun', meal: 'Meal 2 (6:30 PM)', label: 'SUN MEAL 2', contents: ['Cook fresh: shrimp or remaining ground turkey', 'Roast fresh: 1 cup asparagus', 'Shred fresh: 1 cup purple cabbage slaw', '1 baked sweet potato', 'Greek yogurt + cinnamon if still hungry'] },
+];
+
 // ---------------------------------------------------------------------------
 // Midweek check — Wednesday checklist
 // ---------------------------------------------------------------------------

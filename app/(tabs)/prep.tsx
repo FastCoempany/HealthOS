@@ -27,10 +27,12 @@ import {
   INGREDIENT_CARDS,
   PREP_TIMELINE,
   CONTAINER_MAP_4MEAL,
+  CONTAINER_MAP_2MEAL,
   MIDWEEK_CHECK,
   QUICK_REFS,
   type IngredientCard,
 } from '@/constants/prep-data';
+import { type MealMode } from '@/constants/health-data';
 
 type Section = 'timeline' | 'ingredients' | 'containers' | 'midweek' | 'quickref';
 type Category = 'All' | IngredientCard['category'];
@@ -38,6 +40,7 @@ type Category = 'All' | IngredientCard['category'];
 export default function PrepScreen() {
   const [section, setSection] = useState<Section>('timeline');
   const [category, setCategory] = useState<Category>('All');
+  const [mealMode, setMealMode] = useState<MealMode>(4);
   const [checkedSteps, setCheckedSteps] = useState<Record<number, boolean>>({});
   const [checkedMidweek, setCheckedMidweek] = useState<Record<number, boolean>>({});
 
@@ -55,7 +58,7 @@ export default function PrepScreen() {
     <SafeAreaView style={styles.safe}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
 
-        {/* ---- Header ---- */}
+        {/* ---- Header + Meal Toggle ---- */}
         <View style={styles.card}>
           <Text style={styles.eyebrow}>PREP</Text>
           <Text style={styles.sectionTitle}>
@@ -64,6 +67,20 @@ export default function PrepScreen() {
           <Text style={styles.hint}>
             One Sunday session, ~2 hours, covers most of the week. Wednesday is a short check-in for salmon + fresh asparagus.
           </Text>
+          <View style={styles.toggleRow}>
+            <Pressable
+              style={[styles.toggleBtn, mealMode === 2 && styles.toggleBtnActive]}
+              onPress={() => setMealMode(2)}
+            >
+              <Text style={[styles.toggleText, mealMode === 2 && styles.toggleTextActive]}>2 meals</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.toggleBtn, mealMode === 4 && styles.toggleBtnActive]}
+              onPress={() => setMealMode(4)}
+            >
+              <Text style={[styles.toggleText, mealMode === 4 && styles.toggleTextActive]}>4 meals</Text>
+            </Pressable>
+          </View>
         </View>
 
         {/* ---- Section Switcher ---- */}
@@ -159,11 +176,11 @@ export default function PrepScreen() {
         {/* ---- CONTAINERS ---- */}
         {section === 'containers' && (
           <View style={styles.card}>
-            <Text style={styles.eyebrow}>CONTAINER MAP</Text>
+            <Text style={styles.eyebrow}>CONTAINER MAP — {mealMode}-MEAL PLAN</Text>
             <Text style={styles.hint}>
-              4-meal plan. Label each container with tape + Sharpie. Stack in fridge from front (today) to back (later in week).
+              {mealMode}-meal plan. Label each container with tape + Sharpie. Stack in fridge from front (today) to back (later in week).
             </Text>
-            {CONTAINER_MAP_4MEAL.map((c, idx) => (
+            {(mealMode === 2 ? CONTAINER_MAP_2MEAL : CONTAINER_MAP_4MEAL).map((c, idx) => (
               <View key={idx} style={styles.containerCard}>
                 <View style={styles.containerLabelRow}>
                   <Text style={styles.containerLabel}>{c.label}</Text>
@@ -312,6 +329,17 @@ const styles = StyleSheet.create({
   eyebrow: { fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: '#8a939b', fontWeight: '800' },
   sectionTitle: { fontSize: 24, fontWeight: '800', letterSpacing: -1.2, color: Palette.ink, lineHeight: 30 },
   hint: { fontSize: 13, color: Palette.muted, lineHeight: 19 },
+
+  // Toggle
+  toggleRow: { flexDirection: 'row', gap: 10, marginTop: 4 },
+  toggleBtn: {
+    flex: 1, paddingVertical: 14, borderRadius: 16,
+    borderWidth: 1, borderColor: Palette.line,
+    backgroundColor: 'rgba(255,255,255,0.96)', alignItems: 'center',
+  },
+  toggleBtnActive: { backgroundColor: Palette.orange, borderColor: Palette.orange },
+  toggleText: { fontSize: 16, fontWeight: '900', color: Palette.ink },
+  toggleTextActive: { color: '#fff' },
 
   // Tabs
   tabRow: { flexDirection: 'row', gap: 8, paddingVertical: 4 },
